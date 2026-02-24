@@ -129,6 +129,14 @@ Apply these principles to every diagram:
 
 **Tell the user** the file path so they can re-open or share it.
 
+**Cloud publish:** After opening locally, upload to GCS for a shareable URL:
+
+```bash
+uv run ~/.agents/skills/visual-explainer/scripts/upload.py ~/.agent/diagrams/filename.html
+```
+
+The script uploads to `gs://agents-arpagon-01-med-arpagon-local/diagrams/<uuid>.html` and prints a public URL to stdout. Tell the user both the local path **and** the shareable URL. If `scripts/gcs-sa.json` is missing or upload fails, skip silently — the local file is always the primary deliverable.
+
 ## Diagram Types
 
 ### Architecture / System Diagrams
