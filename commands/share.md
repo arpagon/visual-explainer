@@ -1,6 +1,6 @@
 # Share Visual Explainer Page
 
-Share a visual explainer HTML file instantly via Vercel. Returns a live URL with no authentication required.
+Upload a visual explainer HTML file to Google Cloud Storage and get a public URL.
 
 ## Usage
 
@@ -19,40 +19,34 @@ Share a visual explainer HTML file instantly via Vercel. Returns a live URL with
 
 ## How It Works
 
-1. Copies your HTML file to a temp directory as `index.html`
-2. Deploys via the vercel-deploy skill (no auth needed)
-3. Returns a live URL immediately
+1. Generates a UUIDv7-based filename for uniqueness and time-ordering
+2. Uploads to the configured GCS bucket
+3. Returns the public URL immediately
 
-## Requirements
+## Configuration
 
-- **vercel-deploy skill** - Should be pre-installed. If not: `pi install npm:vercel-deploy`
+Set these environment variables:
 
-No Vercel account, Cloudflare account, or API keys needed. The deployment is "claimable" — you can transfer it to your Vercel account later if you want.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VE_GCS_BUCKET` | GCS bucket name | *(required)* |
+| `VE_GCS_PREFIX` | Blob prefix / folder | `diagrams` |
+| `VE_GCS_SA_KEY` | Path to SA JSON key | `scripts/gcs-sa.json` |
 
 ## Script Location
 
 ```bash
-bash {{skill_dir}}/scripts/share.sh <file>
+uv run {{skill_dir}}/scripts/upload.py <file>
 ```
 
 ## Output
 
 ```
-Sharing my-diagram.html...
-
-✓ Shared successfully!
-
-Live URL:  https://skill-deploy-abc123.vercel.app
-Claim URL: https://vercel.com/claim-deployment?code=...
-```
-
-The script also outputs JSON for programmatic use:
-```json
-{"previewUrl":"https://...","claimUrl":"https://...","deploymentId":"...","projectId":"..."}
+https://storage.googleapis.com/your-bucket/diagrams/019538a2-....html
 ```
 
 ## Notes
 
-- Deployments are **public** — anyone with the URL can view
-- Preview deployments have a configurable retention period (default: 30 days)
-- Each share creates a new deployment with a unique URL
+- URLs are permanent and publicly accessible
+- Files are time-ordered thanks to UUIDv7
+- If `VE_GCS_BUCKET` is not set, the upload will fail with a clear error
