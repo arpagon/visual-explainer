@@ -1,5 +1,5 @@
 #!/bin/bash
-# Sync visual-explainer with upstream (fetch files only, no patching).
+# Sync visual-explainer with upstream (merge + restore custom files).
 # The agent applies preferences after this script runs.
 #
 # Usage:
@@ -16,6 +16,7 @@ cd "$REPO_DIR"
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 RED='\033[0;31m'
+YELLOW='\033[0;33m'
 NC='\033[0m'
 
 # ─── Preflight ──────────────────────────────────────────────────────────
@@ -42,10 +43,18 @@ trap 'rm -rf "$TEMP"' EXIT
 cp -r .arpagon "$TEMP/"
 [ -f FORK.md ] && cp FORK.md "$TEMP/"
 
-# ─── 3. Checkout upstream files ────────────────────────────────────────
+# ─── 3. Merge upstream (keeps commit history linked) ───────────────────
 
-echo -e "${CYAN}==> Syncing all files from upstream/main...${NC}"
-git checkout upstream/main -- .
+echo -e "${CYAN}==> Merging upstream/main...${NC}"
+# Accept all upstream changes on conflict — our customizations
+# come from .arpagon/files/ and the agent's preference edits, not from
+# manually edited upstream files.
+git merge upstream/main --no-edit -X theirs || {
+    echo -e "${YELLOW}    Merge had conflicts, resolving with upstream versions...${NC}"
+    git checkout --theirs .
+    git add -A
+    git commit --no-edit
+}
 
 # ─── 4. Restore our stuff ──────────────────────────────────────────────
 
@@ -77,7 +86,7 @@ echo -e "${CYAN}==> Removing replaced upstream files...${NC}"
 
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}  Upstream synced. SKILL.md is raw upstream.${NC}"
+echo -e "${GREEN}  Upstream merged. SKILL.md is raw upstream.${NC}"
 echo -e "${GREEN}  Now read .arpagon/preferences.yaml and apply.${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
 echo ""
