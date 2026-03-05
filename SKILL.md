@@ -135,7 +135,12 @@ Apply these principles to every diagram:
 uv run ~/.agents/skills/visual-explainer/scripts/upload.py ~/.agent/diagrams/filename.html
 ```
 
-The script uploads to `gs://agents-arpagon-01-med-arpagon-local/diagrams/<uuid>.html` and prints a public URL to stdout. Tell the user both the local path **and** the shareable URL. If `scripts/gcs-sa.json` is missing or upload fails, skip silently — the local file is always the primary deliverable.
+The script uploads to `gs://$VE_GCS_BUCKET/diagrams/<uuid>.html` and prints a public URL to stdout. Tell the user both the local path **and** the shareable URL. If the required env vars are missing or upload fails, skip silently — the local file is always the primary deliverable.
+
+**Required env vars:**
+- `VE_GCS_BUCKET` — GCS bucket name (required)
+- `VE_GCS_PREFIX` — blob prefix (default: `diagrams`)
+- `VE_GCS_SA_KEY` — path to service account JSON (default: `scripts/gcs-sa.json`)
 
 ## Diagram Types
 

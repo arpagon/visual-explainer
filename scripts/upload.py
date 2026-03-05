@@ -4,15 +4,16 @@
 # ///
 """Upload an HTML diagram to GCS and print a public URL."""
 
+import os
 import sys
 from pathlib import Path
 
 from google.cloud import storage
 from uuid_extensions import uuid7str
 
-BUCKET = "agents-arpagon-01-med-arpagon-local"
-PREFIX = "diagrams"
-SA_KEY = Path(__file__).parent / "gcs-sa.json"
+BUCKET = os.environ.get("VE_GCS_BUCKET", "")
+PREFIX = os.environ.get("VE_GCS_PREFIX", "diagrams")
+SA_KEY = Path(os.environ.get("VE_GCS_SA_KEY", Path(__file__).parent / "gcs-sa.json"))
 PUBLIC_URL = f"https://storage.googleapis.com/{BUCKET}"
 
 
@@ -24,6 +25,10 @@ def main() -> None:
     local_file = Path(sys.argv[1])
     if not local_file.exists():
         print(f"Error: file not found: {local_file}", file=sys.stderr)
+        sys.exit(1)
+
+    if not BUCKET:
+        print("Error: VE_GCS_BUCKET env var is not set", file=sys.stderr)
         sys.exit(1)
 
     if not SA_KEY.exists():
