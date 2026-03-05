@@ -1,0 +1,39 @@
+# Arpagon's preferences for visual-explainer
+# The agent reads this file and applies each preference to SKILL.md
+# after syncing from upstream. These are intentions, not exact patches.
+
+preferences:
+  - name: opt-in-only
+    intent: >
+      Remove ALL proactive/automatic behavior from the skill.
+      The skill must ONLY activate when the user explicitly asks for a
+      visual diagram, HTML page, or visual explanation.
+      Remove or rewrite any language that says "always", "never fall back",
+      "proactively", "don't wait for the user to ask", "visual is always default",
+      or similar aggressive directives.
+      Tables, essays, and other content should NOT automatically become HTML pages.
+      The user decides when to use this skill.
+
+  - name: agent-browser
+    intent: >
+      Replace all references to surf-cli (Gemini AI image generation tool)
+      with agent-browser (web screenshot tool).
+      surf-cli generates AI art. We don't use that.
+      Instead, agent-browser captures screenshots of real web pages, UIs,
+      and running applications via `agent-browser open <url>` and
+      `agent-browser screenshot <path>`.
+      Update the compatibility line, the illustrations section, the slide
+      deck mode section, and anywhere else surf-cli is mentioned.
+      Keep the base64 embedding workflow but adapt it to agent-browser commands.
+
+  - name: gcs-upload
+    intent: >
+      Replace Vercel deploy sharing with Google Cloud Storage upload.
+      The upload script is at scripts/upload.py (copied from .arpagon/files/).
+      Usage: `uv run {{skill_dir}}/scripts/upload.py <html-file>`
+      It generates a UUIDv7-based filename and uploads to GCS.
+      Configuration is via environment variables:
+        VE_GCS_BUCKET (required), VE_GCS_PREFIX (default: diagrams),
+        VE_GCS_SA_KEY (default: scripts/gcs-sa.json).
+      Remove all references to Vercel, vercel-deploy skill, and share.sh.
+      The commands/share.md file is also replaced (from .arpagon/files/).
