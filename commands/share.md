@@ -1,6 +1,6 @@
 # Share Visual Explainer Page
 
-Upload a visual explainer HTML file to Google Cloud Storage and get a public URL.
+Share a visual explainer HTML file instantly via Vercel. Returns a live URL with no authentication required.
 
 ## Usage
 
@@ -19,34 +19,40 @@ Upload a visual explainer HTML file to Google Cloud Storage and get a public URL
 
 ## How It Works
 
-1. Generates a UUIDv7-based filename for uniqueness and time-ordering
-2. Uploads to the configured GCS bucket
-3. Returns the public URL immediately
+1. Copies your HTML file to a temp directory as `index.html`
+2. Deploys via the vercel-deploy skill (no auth needed)
+3. Returns a live URL immediately
 
-## Configuration
+## Requirements
 
-Set these environment variables:
+- **vercel-deploy skill** - Should be pre-installed. If not: `pi install npm:vercel-deploy`
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VE_GCS_BUCKET` | GCS bucket name | *(required)* |
-| `VE_GCS_PREFIX` | Blob prefix / folder | `diagrams` |
-| `VE_GCS_SA_KEY` | Path to SA JSON key | `scripts/gcs-sa.json` |
+No Vercel account, Cloudflare account, or API keys needed. The deployment is "claimable" — you can transfer it to your Vercel account later if you want.
 
 ## Script Location
 
 ```bash
-uv run {{skill_dir}}/scripts/upload.py <file>
+bash {{skill_dir}}/scripts/share.sh <file>
 ```
 
 ## Output
 
 ```
-https://storage.googleapis.com/your-bucket/diagrams/019538a2-....html
+Sharing my-diagram.html...
+
+✓ Shared successfully!
+
+Live URL:  https://skill-deploy-abc123.vercel.app
+Claim URL: https://vercel.com/claim-deployment?code=...
+```
+
+The script also outputs JSON for programmatic use:
+```json
+{"previewUrl":"https://...","claimUrl":"https://...","deploymentId":"...","projectId":"..."}
 ```
 
 ## Notes
 
-- URLs are permanent and publicly accessible
-- Files are time-ordered thanks to UUIDv7
-- If `VE_GCS_BUCKET` is not set, the upload will fail with a clear error
+- Deployments are **public** — anyone with the URL can view
+- Preview deployments have a configurable retention period (default: 30 days)
+- Each share creates a new deployment with a unique URL

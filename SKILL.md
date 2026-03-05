@@ -19,7 +19,7 @@ Generate self-contained HTML files for technical diagrams, visualizations, and d
 
 Before writing HTML, commit to a direction. Don't default to "dark theme with blue accents" every time.
 
-**Visual treatment when requested.** When the user asks for a visual page, essays, blog posts, and articles get full visual treatment — extract structure into cards, diagrams, grids, tables.
+**Visual is always default.** Even essays, blog posts, and articles get visual treatment — extract structure into cards, diagrams, grids, tables.
 
 Prose patterns (lead paragraphs, pull quotes, callout boxes) are **accent elements** within visual pages, not a separate mode. Use them to highlight key points or provide breathing room, but the page structure remains visual.
 
@@ -82,6 +82,14 @@ Vary the choice each time. If the last diagram was dark and technical, make the 
 **Mermaid theming:** Always use `theme: 'base'` with custom `themeVariables` so colors match your page palette. Use `layout: 'elk'` for complex graphs (requires the `@mermaid-js/layout-elk` package — see `./references/libraries.md` for the CDN import). Override Mermaid's SVG classes with CSS for pixel-perfect control. See `./references/libraries.md` for full theming guide.
 
 **Mermaid containers:** Always center Mermaid diagrams with `display: flex; justify-content: center;`. Add zoom controls (+/−/reset/expand) to every `.mermaid-wrap` container. Include the click-to-expand JavaScript so clicking the diagram (or the ⛶ button) opens it full-size in a new tab.
+
+**Mermaid scaling:** Diagrams with 10+ nodes render too small by default. For 10-12 nodes, increase `fontSize` in themeVariables to 18-20px and set `INITIAL_ZOOM` to 1.5-1.6. For 15+ elements, don't try to scale — use the hybrid pattern instead (simple Mermaid overview + CSS Grid cards). See "Architecture / System Diagrams" below.
+
+**Mermaid layout direction:** Prefer `flowchart TD` (top-down) over `flowchart LR` (left-to-right) for complex diagrams. LR spreads horizontally and makes labels unreadable when there are many nodes. Use LR only for simple 3-4 node linear flows. See `./references/libraries.md` "Layout Direction: TD vs LR".
+
+**Mermaid line breaks in flowchart labels:** Use `<br/>` inside quoted labels. Never use escaped newlines like `\n` (Mermaid renders them as literal text in HTML output). Example: `A["Copilot Backend<br/>/api + /api/voicebot"]`.
+
+**Mermaid CSS class collision constraint:** Never define `.node` as a page-level CSS class. Mermaid.js uses `.node` internally on SVG `<g>` elements with `transform: translate(x, y)` for positioning. Page-level `.node` styles (hover transforms, box-shadows) leak into diagrams and break layout. Use the namespaced `.ve-card` class for card components instead. The only safe way to style Mermaid's `.node` is scoped under `.mermaid` (e.g., `.mermaid .node rect`).
 
 **Mermaid scaling:** Diagrams with 10+ nodes render too small by default. For 10-12 nodes, increase `fontSize` in themeVariables to 18-20px and set `INITIAL_ZOOM` to 1.5-1.6. For 15+ elements, don't try to scale — use the hybrid pattern instead (simple Mermaid overview + CSS Grid cards). See "Architecture / System Diagrams" below.
 
@@ -308,7 +316,7 @@ An alternative output format for presenting content as a magazine-quality slide 
 
 **Slide types (10):** Title, Section Divider, Content, Split, Diagram, Dashboard, Table, Code, Quote, Full-Bleed. Each has a defined layout in `slide-patterns.md`. Content that exceeds a slide's density limit splits across multiple slides — never scrolls within a slide.
 
-**Visual richness:** Check `which agent-browser` at the start. If agent-browser is available, capture 2–4 screenshots (relevant web UIs, current system state, documentation pages) before writing HTML and embed them as base64. Also use SVG decorative accents, per-slide background gradients, inline sparklines, and small Mermaid diagrams. Visual-first, text-second.
+**Visual richness:** Check `which surf` at the start. If surf-cli is available, generate 2–4 images (title slide background, full-bleed background, optional content illustrations) before writing HTML — see the Proactive Imagery section in `slide-patterns.md` for the workflow. Also use SVG decorative accents, per-slide background gradients, inline sparklines, and small Mermaid diagrams. Visual-first, text-second.
 
 **Compositional variety:** Consecutive slides must vary spatial approach — centered, left-heavy, right-heavy, split, edge-aligned, full-bleed. Three centered slides in a row means push one off-axis.
 
@@ -342,43 +350,35 @@ Every diagram is a single self-contained `.html` file. No external assets except
 
 ## Sharing Pages
 
-Upload visual explainer pages to Google Cloud Storage for instant sharing via public URL.
+Share visual explainer pages instantly via Vercel. No account or authentication required.
 
 **Usage:**
 ```bash
-uv run {{skill_dir}}/scripts/upload.py <html-file>
+bash {{skill_dir}}/scripts/share.sh <html-file>
 ```
 
 **Example:**
 ```bash
-uv run {{skill_dir}}/scripts/upload.py ~/.agent/diagrams/my-diagram.html
+bash {{skill_dir}}/scripts/share.sh ~/.agent/diagrams/my-diagram.html
 
 # Output:
-# https://storage.googleapis.com/your-bucket/diagrams/019538a2-....html
+# ✓ Shared successfully!
+# Live URL:  https://skill-deploy-abc123.vercel.app
+# Claim URL: https://vercel.com/claim-deployment?code=...
 ```
 
 **How it works:**
-1. Generates a UUIDv7-based filename for uniqueness and time-ordering
-2. Uploads to the configured GCS bucket
-3. Returns the public URL immediately
-
-**Configuration (environment variables):**
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VE_GCS_BUCKET` | GCS bucket name | *(required)* |
-| `VE_GCS_PREFIX` | Blob prefix / folder | `diagrams` |
-| `VE_GCS_SA_KEY` | Path to service account JSON | `scripts/gcs-sa.json` |
+1. Copies HTML file to temp directory as `index.html`
+2. Deploys via the vercel-deploy skill (zero-auth claimable deployment)
+3. URL is live immediately — works in any browser
 
 **Requirements:**
-- `uv` (Python package runner)
-- GCS service account with write access to the bucket
-- Bucket configured for public read access
+- vercel-deploy skill (should be pre-installed; if not: `pi install npm:vercel-deploy`)
 
 **Notes:**
-- URLs are permanent and publicly accessible
-- Files are ordered by time thanks to UUIDv7
-- If env vars are not set, sharing is skipped silently
+- Deployments are public — anyone with the URL can view
+- Preview deployments have configurable retention (default: 30 days)
+- Claim URL lets you transfer the deployment to your Vercel account
 
 See `./commands/share.md` for the `/share` command template.
 
