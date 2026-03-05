@@ -4,11 +4,8 @@
 
 # ─── Entorno ────────────────────────────────────────────────────────────
 # Estas variables deben existir para que el sharing via GCS funcione.
-# El agente NO las configura — solo las usa.
-env:
-  VE_GCS_BUCKET: "agents-arpagon-01-med-arpagon-local"
-  VE_GCS_PREFIX: "diagrams"
-  VE_GCS_SA_KEY: "~/.config/gcloud/ve-sa.json"
+# Están en ~/.bashrc, NO en este archivo.
+# VE_GCS_BUCKET, VE_GCS_SA_KEY, VE_GCS_PREFIX (optional, default: diagrams)
 
 preferences:
   - name: opt-in-only
