@@ -2,6 +2,14 @@
 # El agente lee este archivo y aplica cada preferencia sobre SKILL.md
 # después de sincronizar con upstream. Son intenciones, no parches exactos.
 
+# ─── Entorno ────────────────────────────────────────────────────────────
+# Estas variables deben existir para que el sharing via GCS funcione.
+# El agente NO las configura — solo las usa.
+env:
+  VE_GCS_BUCKET: "agents-arpagon-01-med-arpagon-local"
+  VE_GCS_PREFIX: "diagrams"
+  VE_GCS_SA_KEY: "~/.config/gcloud/ve-sa.json"
+
 preferences:
   - name: opt-in-only
     intent: >
