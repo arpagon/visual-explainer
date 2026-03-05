@@ -1,68 +1,68 @@
 # Fork: arpagon/visual-explainer
 
-## Origin
+## Origen
 
-Fork of [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer) — an agent skill that turns complex terminal output into styled, self-contained HTML pages.
+Fork de [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer) — un skill de agente que convierte salida compleja de terminal en páginas HTML estilizadas y autocontenidas.
 
-## How it works
+## Cómo funciona
 
 ```
 upstream/main          ← nicobailon/visual-explainer
        │
-       │  sync.sh (fetch + copy files)
+       │  sync.sh (fetch + copiar archivos)
        ▼
-  Raw upstream SKILL.md
+  SKILL.md upstream puro
        │
-       │  Agent reads preferences.yaml and applies changes
+       │  El agente lee preferences.yaml y aplica cambios
        ▼
-     main              ← single branch: upstream + preferences applied
+     main              ← única rama: upstream + preferencias aplicadas
 ```
 
-No mechanical patching. The agent reads `preferences.yaml`, understands the intent, and edits `SKILL.md` with judgment. If upstream rewrites a section, the agent adapts — no broken string matches.
+Sin parches mecánicos. El agente lee `preferences.yaml`, entiende la intención, y edita `SKILL.md` con criterio. Si upstream reescribe una sección, el agente se adapta.
 
-### Sync
+### Sincronizar
 
-Tell the agent: **"actualiza visual-explainer y aplica mis preferencias"**
+Decirle al agente: **"actualiza visual-explainer y aplica mis preferencias"**
 
-Or manually:
+O manualmente:
 ```bash
-bash .arpagon/sync.sh   # fetch upstream
-# then the agent reads preferences.yaml and applies
+bash .arpagon/sync.sh   # trae upstream
+# luego el agente lee preferences.yaml y aplica
 ```
 
-## Preferences
+## Preferencias
 
-Defined in `.arpagon/preferences.yaml`:
+Definidas en `.arpagon/preferences.yaml`:
 
-| Preference | Intent |
-|-----------|--------|
-| `opt-in-only` | Remove all proactive behavior — only activate on explicit user request |
-| `agent-browser` | Replace surf-cli with agent-browser for web screenshots |
-| `gcs-upload` | Replace Vercel sharing with GCS upload |
+| Preferencia | Intención |
+|------------|-----------|
+| `opt-in-only` | Quitar todo comportamiento proactivo — solo activar cuando el usuario lo pida |
+| `agent-browser` | Reemplazar surf-cli con agent-browser para screenshots web |
+| `gcs-upload` | Reemplazar sharing via Vercel con upload a GCS |
 
-## Custom files
+## Archivos custom
 
-Copied from `.arpagon/files/` during sync:
+Copiados desde `.arpagon/files/` durante el sync:
 
-| File | Replaces |
-|------|----------|
+| Archivo | Reemplaza |
+|---------|-----------|
 | `scripts/upload.py` | `scripts/share.sh` |
-| `commands/share.md` | Upstream Vercel version |
+| `commands/share.md` | Versión Vercel de upstream |
 
 ## Branching
 
-One branch: `main`. That's it.
+Una rama: `main`. Eso es todo.
 
-- `main` = upstream + preferences applied (what pi reads)
-- `remotes/upstream/main` = upstream reference (via `git fetch upstream`)
+- `main` = upstream + preferencias aplicadas (lo que pi lee)
+- `remotes/upstream/main` = referencia upstream (via `git fetch upstream`)
 
-## Structure
+## Estructura
 
 ```
 .arpagon/
-├── preferences.yaml      ← What I want (agent reads this)
-├── sync.sh               ← Fetches upstream files
-└── files/                 ← Custom files copied during sync
+├── preferences.yaml      ← Qué quiero (el agente lee esto)
+├── sync.sh               ← Trae archivos de upstream
+└── files/                 ← Archivos custom copiados durante sync
     ├── scripts/upload.py
     └── commands/share.md
 ```

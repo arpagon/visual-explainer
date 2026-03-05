@@ -1,39 +1,40 @@
-# Arpagon's preferences for visual-explainer
-# The agent reads this file and applies each preference to SKILL.md
-# after syncing from upstream. These are intentions, not exact patches.
+# Preferencias de arpagon para visual-explainer
+# El agente lee este archivo y aplica cada preferencia sobre SKILL.md
+# después de sincronizar con upstream. Son intenciones, no parches exactos.
 
 preferences:
   - name: opt-in-only
     intent: >
-      Remove ALL proactive/automatic behavior from the skill.
-      The skill must ONLY activate when the user explicitly asks for a
-      visual diagram, HTML page, or visual explanation.
-      Remove or rewrite any language that says "always", "never fall back",
-      "proactively", "don't wait for the user to ask", "visual is always default",
-      or similar aggressive directives.
-      Tables, essays, and other content should NOT automatically become HTML pages.
-      The user decides when to use this skill.
+      Quitar TODO comportamiento proactivo/automático del skill.
+      El skill solo debe activarse cuando el usuario pida explícitamente
+      un diagrama visual, página HTML o explicación visual.
+      Quitar o reescribir cualquier texto que diga "always", "never fall back",
+      "proactively", "don't wait for the user to ask", "visual is always default"
+      o directivas agresivas similares.
+      Las tablas, ensayos y otro contenido NO deben convertirse en HTML automáticamente.
+      El usuario decide cuándo usar este skill.
 
   - name: agent-browser
     intent: >
-      Replace all references to surf-cli (Gemini AI image generation tool)
-      with agent-browser (web screenshot tool).
-      surf-cli generates AI art. We don't use that.
-      Instead, agent-browser captures screenshots of real web pages, UIs,
-      and running applications via `agent-browser open <url>` and
+      Reemplazar todas las referencias a surf-cli (herramienta de generación
+      de imágenes con IA de Gemini) por agent-browser (herramienta de screenshots).
+      surf-cli genera arte con IA. No usamos eso.
+      En su lugar, agent-browser captura screenshots de páginas web reales, UIs
+      y aplicaciones en ejecución via `agent-browser open <url>` y
       `agent-browser screenshot <path>`.
-      Update the compatibility line, the illustrations section, the slide
-      deck mode section, and anywhere else surf-cli is mentioned.
-      Keep the base64 embedding workflow but adapt it to agent-browser commands.
+      Actualizar la línea de compatibilidad, la sección de ilustraciones,
+      la sección de slide deck mode, y cualquier otro lugar donde se mencione
+      surf-cli. Mantener el flujo de embeber en base64 pero adaptado a
+      los comandos de agent-browser.
 
   - name: gcs-upload
     intent: >
-      Replace Vercel deploy sharing with Google Cloud Storage upload.
-      The upload script is at scripts/upload.py (copied from .arpagon/files/).
-      Usage: `uv run {{skill_dir}}/scripts/upload.py <html-file>`
-      It generates a UUIDv7-based filename and uploads to GCS.
-      Configuration is via environment variables:
-        VE_GCS_BUCKET (required), VE_GCS_PREFIX (default: diagrams),
+      Reemplazar el sharing via Vercel deploy con upload a Google Cloud Storage.
+      El script de upload está en scripts/upload.py (copiado desde .arpagon/files/).
+      Uso: `uv run {{skill_dir}}/scripts/upload.py <html-file>`
+      Genera un nombre de archivo basado en UUIDv7 y sube a GCS.
+      Configuración via variables de entorno:
+        VE_GCS_BUCKET (requerido), VE_GCS_PREFIX (default: diagrams),
         VE_GCS_SA_KEY (default: scripts/gcs-sa.json).
-      Remove all references to Vercel, vercel-deploy skill, and share.sh.
-      The commands/share.md file is also replaced (from .arpagon/files/).
+      Quitar todas las referencias a Vercel, vercel-deploy skill, y share.sh.
+      El archivo commands/share.md también se reemplaza (desde .arpagon/files/).
