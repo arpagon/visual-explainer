@@ -1,74 +1,47 @@
 ---
-name: ve-maintain
-description: Sync visual-explainer with upstream and apply arpagon's patches. Use when asked to update, sync, or maintain the visual-explainer skill.
+name: ve-preferences
+description: Sync visual-explainer with upstream and apply arpagon's preferences. Use when asked to update, sync, or apply preferences to visual-explainer.
 ---
 
-# Maintain Visual Explainer (arpagon patches)
+# Visual Explainer — Arpagon Preferences
 
-This skill manages the patched visual-explainer installation. It syncs upstream changes and applies arpagon's customizations automatically — like k3s rebasing patches on upstream Kubernetes.
+Sync visual-explainer with upstream and apply arpagon's preferences.
 
-## Quick sync
+## When to use
+
+When the user says: "actualiza visual-explainer", "aplica mis preferencias", "sync upstream", "update visual-explainer".
+
+## Steps
+
+### 1. Sync upstream
 
 ```bash
 bash {{skill_dir}}/sync.sh
 ```
 
-This will:
-1. Fetch latest from `upstream/main`
-2. Overwrite all files with upstream versions
-3. Restore `.arpagon/` directory (patches and custom files)
-4. Copy custom files from `.arpagon/files/` into the repo
-5. Remove replaced upstream files (`scripts/share.sh`, `.claude-plugin/`)
-6. Apply all patches via `python3 .arpagon/apply_patches.py`
-7. Show a diff summary — review and commit manually
+This merges latest upstream, restores `.arpagon/`, copies custom files, and removes replaced files. After this, `SKILL.md` is raw upstream — preferences have NOT been applied yet.
 
-## Patches
+### 2. Read preferences
 
-Defined in `.arpagon/apply_patches.py`. Each patch is an independent function:
-
-| Patch | What it does |
-|-------|-------------|
-| `patch_opt_in_only` | Removes proactive behavior — skill activates only on explicit user request |
-| `patch_agent_browser` | Replaces surf-cli with agent-browser for web screenshots and captures |
-| `patch_gcs_upload` | Replaces Vercel sharing with GCS upload (UUIDv7 public URLs) |
-
-### How patches work
-
-Each patch uses **exact string replacement** on upstream files. If upstream changes the target text, the patch prints a warning with the expected string. To fix a broken patch:
-
-1. Run `python3 .arpagon/apply_patches.py` and read the warnings
-2. Check `git diff` to see what upstream changed
-3. Update the old (target) string in `apply_patches.py` to match the new upstream text
-4. Re-run
-
-### Dry run (check without applying)
-
-```bash
-python3 .arpagon/apply_patches.py --check
+```
+{{skill_dir}}/preferences.yaml
 ```
 
-### Adding a new patch
+Each preference has a `name` and an `intent` describing what to change.
 
-1. Add a new function in `apply_patches.py` (follow the existing pattern)
-2. Add it to the `SKILL_PATCHES` list at the bottom
-3. Run `python3 .arpagon/apply_patches.py` to test
+### 3. Apply preferences
 
-## Custom files
+Edit `SKILL.md` directly using the edit tool. For each preference, find the relevant text and rewrite it according to the intent. Use judgment — the intents describe WHAT to change, not exact strings.
 
-Files in `.arpagon/files/` are copied into the repo during sync, overwriting upstream files at the same relative path:
+### 4. Verify
 
-| Source | Destination | Replaces |
-|--------|-------------|----------|
-| `.arpagon/files/scripts/upload.py` | `scripts/upload.py` | `scripts/share.sh` |
-| `.arpagon/files/commands/share.md` | `commands/share.md` | Upstream Vercel version |
+After applying, verify zero matches for:
+- `surf-cli`, `surf`, `which surf` → should be `agent-browser`
+- `Vercel`, `vercel-deploy`, `share.sh` → should be GCS/`upload.py`
+- `proactively`, `always default`, `Never fall back`, `Don't wait for the user`
 
-## After syncing
+### 5. Commit
 
 ```bash
-# Review what changed
-git diff --stat
-git diff
-
-# Commit
-git add -A && git commit -m "chore: sync upstream $(git log upstream/main -1 --format=%h) + apply patches"
+cd {{skill_dir}}/.. && git add -A && git commit -m "chore: sync upstream $(git log upstream/main -1 --format=%h) + apply preferences"
 ```
