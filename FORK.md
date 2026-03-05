@@ -9,25 +9,45 @@ Fork of [nicobailon/visual-explainer](https://github.com/nicobailon/visual-expla
 Instead of maintaining a divergent fork, this repo uses an **automated patch system**: upstream files are synced as-is, then a set of patches transform them to match arpagon's preferences. The patches are small, surgical, and independent — when upstream changes, only the affected patch targets need updating.
 
 ```
-upstream/main (v0.5.0, v0.6.0, ...)
-       │
-       ▼
-  git checkout upstream/main -- .     ← sync all upstream files
-       │
-       ▼
-  .arpagon/apply_patches.py           ← apply 3 patches
-       │
-       ▼
-  Patched skill ready to use
+remotes/upstream/main  (nicobailon/visual-explainer)
+         │
+         │  git fetch upstream
+         │  git checkout upstream/main -- .
+         ▼
+       main             ← single branch: upstream + patches applied
+         │                 (what pi reads via ~/.agents/skills/visual-explainer)
+         │
+         └── .arpagon/  ← patch system lives here
+```
+
+### Branching
+
+**One branch: `main`.** That's it.
+
+- `main` = upstream + patches applied. Always in a usable state. This is what pi reads.
+- `remotes/upstream/main` = upstream reference. Exists automatically after `git fetch upstream`. Not a local branch.
+
+No upstream-tracking local branch. No feature branches. The `.arpagon/` directory and `FORK.md` only exist on `main` — they're saved and restored during sync so they never conflict with upstream.
+
+**To see upstream state:**
+```bash
+git log upstream/main                              # history
+git show upstream/main:SKILL.md                    # specific file
+diff <(git show upstream/main:SKILL.md) SKILL.md   # your patches vs upstream
 ```
 
 ### Sync from upstream
 
 ```bash
-bash .arpagon/sync.sh
-# review with: git diff
-# commit with: git add -A && git commit -m "chore: sync upstream + apply patches"
+bash .arpagon/sync.sh          # interactive
+bash .arpagon/sync.sh --auto   # non-interactive (for agent use)
+
+# review → commit
+git diff
+git add -A && git commit -m "chore: sync upstream $(git log upstream/main -1 --format=%h) + apply arpagon patches"
 ```
+
+Or just tell the agent: **"actualiza visual-explainer y aplica mis preferencias"** — the `ve-preferences` skill handles everything.
 
 ## Active Patches
 
@@ -39,7 +59,7 @@ bash .arpagon/sync.sh
 
 ## Custom Files
 
-Files added that don't exist in upstream:
+Files that don't exist in upstream (added during sync from `.arpagon/files/`):
 
 | File | Purpose |
 |------|---------|
@@ -77,4 +97,4 @@ If upstream changes text that a patch targets, `apply_patches.py` prints a warni
     Expected: Use when the user asks for a diagram...
 ```
 
-Fix: open `apply_patches.py`, find the patch, update the old string to match upstream's new wording, re-run.
+Fix: open `.arpagon/apply_patches.py`, find the patch, update the old string to match upstream's new wording, re-run.
