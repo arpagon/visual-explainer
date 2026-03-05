@@ -26,13 +26,13 @@ Decirle al agente: **"actualiza visual-explainer y aplica mis preferencias"**
 
 O manualmente:
 ```bash
-bash .arpagon/sync.sh   # trae upstream
+bash .agents/skills/ve-preferences/sync.sh   # trae upstream
 # luego el agente lee preferences.yaml y aplica
 ```
 
 ## Preferencias
 
-Definidas en `.arpagon/preferences.yaml`:
+Definidas en `.agents/skills/ve-preferences/preferences.yaml`:
 
 | Preferencia | Intención |
 |------------|-----------|
@@ -42,7 +42,7 @@ Definidas en `.arpagon/preferences.yaml`:
 
 ## Archivos custom
 
-Copiados desde `.arpagon/files/` durante el sync:
+Copiados desde `.agents/skills/ve-preferences/files/` durante el sync:
 
 | Archivo | Reemplaza |
 |---------|-----------|
@@ -59,7 +59,7 @@ Una rama: `main`. Eso es todo.
 ## Estructura
 
 ```
-.arpagon/
+.agents/skills/ve-preferences/
 ├── preferences.yaml      ← Qué quiero (el agente lee esto)
 ├── sync.sh               ← Trae archivos de upstream
 └── files/                 ← Archivos custom copiados durante sync
