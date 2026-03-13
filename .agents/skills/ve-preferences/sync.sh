@@ -66,18 +66,22 @@ echo -e "${CYAN}==> Copying custom files...${NC}"
 if [ -d "$SKILL_DIR/files" ]; then
     cd "$SKILL_DIR/files"
     find . -type f | while read -r f; do
-        target="$REPO_DIR/${f#./}"
+        # Files go into plugins/visual-explainer/ (upstream's new structure)
+        target="$REPO_DIR/plugins/visual-explainer/${f#./}"
         mkdir -p "$(dirname "$target")"
         cp "$f" "$target"
-        echo -e "    ${GREEN}+${NC} ${f#./}"
+        echo -e "    ${GREEN}+${NC} plugins/visual-explainer/${f#./}"
     done
+    # .gitignore goes to repo root
+    [ -f "$SKILL_DIR/files/.gitignore" ] && cp "$SKILL_DIR/files/.gitignore" "$REPO_DIR/.gitignore" && echo -e "    ${GREEN}+${NC} .gitignore (root)"
     cd "$REPO_DIR"
 fi
 
 # ─── 6. Remove replaced upstream files ─────────────────────────────────
 
 echo -e "${CYAN}==> Removing replaced upstream files...${NC}"
-[ -f scripts/share.sh ] && rm -f scripts/share.sh && echo -e "    ${RED}-${NC} scripts/share.sh"
+[ -f plugins/visual-explainer/scripts/share.sh ] && rm -f plugins/visual-explainer/scripts/share.sh && echo -e "    ${RED}-${NC} plugins/visual-explainer/scripts/share.sh"
+[ -d plugins/visual-explainer/.claude-plugin ]   && rm -rf plugins/visual-explainer/.claude-plugin   && echo -e "    ${RED}-${NC} plugins/visual-explainer/.claude-plugin/"
 [ -d .claude-plugin ]   && rm -rf .claude-plugin   && echo -e "    ${RED}-${NC} .claude-plugin/"
 
 # ─── 7. Done — agent applies preferences next ──────────────────────────

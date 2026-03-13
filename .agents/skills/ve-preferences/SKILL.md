@@ -19,7 +19,7 @@ When the user says: "actualiza visual-explainer", "aplica mis preferencias", "sy
 bash {{skill_dir}}/sync.sh
 ```
 
-This merges latest upstream, restores `.arpagon/`, copies custom files, and removes replaced files. After this, `SKILL.md` is raw upstream — preferences have NOT been applied yet.
+This merges latest upstream, restores `.agents/`, copies custom files, and removes replaced files. After this, `SKILL.md` is raw upstream — preferences have NOT been applied yet.
 
 ### 2. Read preferences
 
@@ -31,7 +31,9 @@ Each preference has a `name` and an `intent` describing what to change.
 
 ### 3. Apply preferences
 
-Edit `SKILL.md` directly using the edit tool. For each preference, find the relevant text and rewrite it according to the intent. Use judgment — the intents describe WHAT to change, not exact strings.
+The SKILL.md lives at `plugins/visual-explainer/SKILL.md` (upstream moved it there for Claude Code marketplace structure).
+
+Edit it directly using the edit tool. For each preference, find the relevant text and rewrite it according to the intent. Use judgment — the intents describe WHAT to change, not exact strings.
 
 ### 4. Verify
 
@@ -43,5 +45,5 @@ After applying, verify zero matches for:
 ### 5. Commit
 
 ```bash
-cd {{skill_dir}}/.. && git add -A && git commit -m "chore: sync upstream $(git log upstream/main -1 --format=%h) + apply preferences"
+cd {{skill_dir}}/../../.. && git add -A && git commit -m "chore: sync upstream $(git log upstream/main -1 --format=%h) + apply preferences"
 ```
