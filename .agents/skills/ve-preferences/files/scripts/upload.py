@@ -35,7 +35,8 @@ def main() -> None:
         print(f"Error: SA key not found: {SA_KEY}", file=sys.stderr)
         sys.exit(1)
 
-    blob_name = f"{PREFIX}/{uuid7str()}.html"
+    slug = local_file.stem  # e.g. "vta-capacity-planning"
+    blob_name = f"{PREFIX}/{uuid7str()}/{slug}.html"
 
     client = storage.Client.from_service_account_json(str(SA_KEY))
     blob = client.bucket(BUCKET).blob(blob_name)
