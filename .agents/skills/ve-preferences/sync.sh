@@ -3,12 +3,13 @@
 # The agent applies preferences after this script runs.
 #
 # Usage:
-#   bash .arpagon/sync.sh
+#   bash .agents/skills/ve-preferences/sync.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+SKILL_DIR="$REPO_DIR/.agents/skills/ve-preferences"
 
 cd "$REPO_DIR"
 
@@ -37,18 +38,15 @@ echo -e "    Upstream HEAD: ${GREEN}${UPSTREAM_HEAD}${NC}"
 
 # ─── 2. Save our stuff ─────────────────────────────────────────────────
 
-echo -e "${CYAN}==> Saving .arpagon/ and custom files...${NC}"
+echo -e "${CYAN}==> Saving .agents/ and custom files...${NC}"
 TEMP=$(mktemp -d)
 trap 'rm -rf "$TEMP"' EXIT
-cp -r .arpagon "$TEMP/"
+cp -r .agents "$TEMP/"
 [ -f FORK.md ] && cp FORK.md "$TEMP/"
 
 # ─── 3. Merge upstream (keeps commit history linked) ───────────────────
 
 echo -e "${CYAN}==> Merging upstream/main...${NC}"
-# Accept all upstream changes on conflict — our customizations
-# come from .arpagon/files/ and the agent's preference edits, not from
-# manually edited upstream files.
 git merge upstream/main --no-edit -X theirs || {
     echo -e "${YELLOW}    Merge had conflicts, resolving with upstream versions...${NC}"
     git checkout --theirs .
@@ -58,15 +56,15 @@ git merge upstream/main --no-edit -X theirs || {
 
 # ─── 4. Restore our stuff ──────────────────────────────────────────────
 
-echo -e "${CYAN}==> Restoring .arpagon/ ...${NC}"
-cp -r "$TEMP/.arpagon" .
+echo -e "${CYAN}==> Restoring .agents/ ...${NC}"
+cp -r "$TEMP/.agents" .
 [ -f "$TEMP/FORK.md" ] && cp "$TEMP/FORK.md" .
 
 # ─── 5. Copy custom files ──────────────────────────────────────────────
 
-echo -e "${CYAN}==> Copying custom files from .arpagon/files/ ...${NC}"
-if [ -d ".arpagon/files" ]; then
-    cd .arpagon/files
+echo -e "${CYAN}==> Copying custom files...${NC}"
+if [ -d "$SKILL_DIR/files" ]; then
+    cd "$SKILL_DIR/files"
     find . -type f | while read -r f; do
         target="$REPO_DIR/${f#./}"
         mkdir -p "$(dirname "$target")"
@@ -87,7 +85,7 @@ echo -e "${CYAN}==> Removing replaced upstream files...${NC}"
 echo ""
 echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}  Upstream merged. SKILL.md is raw upstream.${NC}"
-echo -e "${GREEN}  Now read .arpagon/preferences.yaml and apply.${NC}"
+echo -e "${GREEN}  Now read preferences.yaml and apply.${NC}"
 echo -e "${GREEN}═══════════════════════════════════════════════════════${NC}"
 echo ""
 echo -e "  Upstream: ${CYAN}${UPSTREAM_HEAD}${NC}"
