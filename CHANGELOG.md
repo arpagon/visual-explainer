@@ -1,5 +1,70 @@
 # Changelog
 
+## [0.6.3] - 2026-03-09
+
+### Documentation
+- Added explicit warning against using bare `<pre class="mermaid">` tags — they render but produce tiny unusable diagrams without zoom/pan controls. Updated SKILL.md to point to the full `diagram-shell` pattern from `templates/mermaid-flowchart.html`.
+
+## [0.6.2] - 2026-03-08
+
+### Bug Fixes
+- Fixed fullscreen diagram export using wrong background color — now uses the same dark/light mode that was used to render the Mermaid theme
+
+## [0.6.1] - 2026-03-08
+
+### Pi Install Script
+- New `install-pi.sh` for one-command installation
+- Automatically patches `{{skill_dir}}` to actual install path
+- Usage: `curl -fsSL https://raw.githubusercontent.com/nicobailon/visual-explainer/main/install-pi.sh | bash`
+
+## [0.6.0] - 2026-03-08
+
+Based on PR #25 by [@peak-flow](https://github.com/peak-flow), with additional multi-diagram architecture and bug fixes.
+
+### Multi-Diagram Support
+- New vector-based zoom/pan engine replacing CSS `zoom` with direct SVG sizing
+- Closure-based `initDiagram(shell)` pattern — per-diagram state in closures, shared drag listeners at module scope
+- Unlimited diagrams per page with no ID collisions (each diagram gets a unique generated ID)
+- New HTML structure: `.diagram-shell` > `.mermaid-wrap` > `.mermaid-viewport` > `.mermaid-canvas`
+- Source Mermaid code lives in `<script type="text/plain" class="diagram-source">` to avoid parsing issues
+- Adaptive viewport height based on diagram aspect ratio
+- Smart fit algorithm with readability floor (prevents tiny unreadable diagrams)
+- New zoom controls: 1:1 button, zoom percentage label
+- Touch pinch-to-zoom support with proper pan transition
+- Double-click to fit diagram
+
+### Bug Fixes
+- Fixed touch pinch→pan transition (reset start coords after pinch ends)
+- Removed dead `fitZoom` variable from previous implementation
+- Removed 12 lines of dead scrollbar CSS (no longer needed with new viewport approach)
+
+### Documentation
+- Updated `css-patterns.md` with new multi-diagram structure and JavaScript pattern
+- Simplified Mermaid section to reference `mermaid-flowchart.html` as canonical source
+
+## [0.5.1] - 2026-03-05
+
+### Claude Code Marketplace Structure
+- Restructured repo to follow Claude Code's official plugin marketplace spec
+- Moved all skill files into `plugins/visual-explainer/` subdirectory
+- Added `.claude-plugin/marketplace.json` catalog for marketplace discovery
+- Plugin manifest now at `plugins/visual-explainer/.claude-plugin/plugin.json`
+- Install via marketplace: `/plugin marketplace add nicobailon/visual-explainer` then `/plugin install visual-explainer@visual-explainer-marketplace`
+
+### Pi Manual Install
+- Replaced `pi install` one-liner with manual installation instructions
+- Pi users now clone repo and copy skill + prompts to `~/.pi/agent/skills/` and `~/.pi/agent/prompts/`
+- Removed stale `pi` field from `package.json` (was pointing to non-existent root paths)
+
+### OpenAI Codex Install Fix
+- Fixed prompts path: `~/.codex/prompts/` (was incorrectly `~/.agents/commands/`)
+- Prompts are optional (deprecated feature) — skill works without them via `$visual-explainer`
+- With prompts installed, invoke as `/prompts:diff-review`, `/prompts:plan-review`, etc.
+
+### Breaking Changes
+- Direct Claude Code plugin install (`/plugin install https://...`) no longer works — use marketplace flow instead
+- `pi install https://github.com/nicobailon/visual-explainer` no longer works — use manual install
+
 ## [0.5.0] - 2026-03-04
 
 ### Class Diagram and C4 Architecture Support

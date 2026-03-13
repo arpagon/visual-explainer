@@ -28,24 +28,40 @@ This skill fixes that. Real typography, dark/light themes, interactive Mermaid d
 
 ## Install
 
-**Pi:**
-```bash
-pi install https://github.com/nicobailon/visual-explainer
-```
-
-**Claude Code (plugin):**
-```bash
-claude /plugin install https://github.com/nicobailon/visual-explainer
+**Claude Code (marketplace):**
+```shell
+/plugin marketplace add nicobailon/visual-explainer
+/plugin install visual-explainer@visual-explainer-marketplace
 ```
 
 Note: Claude Code plugins namespace commands as `/visual-explainer:command-name`.
 
+**Pi:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/nicobailon/visual-explainer/main/install-pi.sh | bash
+```
+
+Or clone and run:
+```bash
+git clone --depth 1 https://github.com/nicobailon/visual-explainer.git
+cd visual-explainer && ./install-pi.sh
+```
+
 **OpenAI Codex:**
 ```bash
-git clone https://github.com/nicobailon/visual-explainer.git ~/.agents/skills/visual-explainer
-mkdir -p ~/.agents/commands
-cp ~/.agents/skills/visual-explainer/commands/*.md ~/.agents/commands/
+git clone --depth 1 https://github.com/nicobailon/visual-explainer.git /tmp/visual-explainer
+
+# Install skill
+cp -r /tmp/visual-explainer/plugins/visual-explainer ~/.agents/skills/visual-explainer
+
+# Optional: Install slash commands (deprecated, but works)
+mkdir -p ~/.codex/prompts
+cp /tmp/visual-explainer/plugins/visual-explainer/commands/*.md ~/.codex/prompts/
+
+rm -rf /tmp/visual-explainer
 ```
+
+Invoke with `$visual-explainer` or let Codex activate it implicitly. With prompts installed, use `/prompts:diff-review`, `/prompts:plan-review`, etc.
 
 ## Commands
 
@@ -76,21 +92,30 @@ https://github.com/user-attachments/assets/342d3558-5fcf-4fb2-bc03-f0dd5b9e35dc
 ## How It Works
 
 ```
-SKILL.md              ← workflow + design principles
-commands/             ← slash commands (works with pi and Claude Code)
-references/           ← agent reads before generating
-├── css-patterns.md   (layouts, animations, theming)
-├── libraries.md      (Mermaid, Chart.js, fonts)
-├── responsive-nav.md (sticky TOC for multi-section pages)
-└── slide-patterns.md (slide engine, transitions, presets)
-templates/            ← reference templates with different palettes
-├── architecture.html
-├── mermaid-flowchart.html
-├── data-table.html
-└── slide-deck.html
-    ↓
-~/.agent/diagrams/filename.html → opens in browser
+.claude-plugin/
+├── plugin.json           ← marketplace identity
+└── marketplace.json      ← plugin catalog
+plugins/
+└── visual-explainer/
+    ├── .claude-plugin/
+    │   └── plugin.json   ← plugin manifest
+    ├── SKILL.md           ← workflow + design principles
+    ├── commands/          ← slash commands
+    ├── references/        ← agent reads before generating
+    │   ├── css-patterns.md   (layouts, animations, theming)
+    │   ├── libraries.md      (Mermaid, Chart.js, fonts)
+    │   ├── responsive-nav.md (sticky TOC for multi-section pages)
+    │   └── slide-patterns.md (slide engine, transitions, presets)
+    ├── templates/         ← reference templates with different palettes
+    │   ├── architecture.html
+    │   ├── mermaid-flowchart.html
+    │   ├── data-table.html
+    │   └── slide-deck.html
+    └── scripts/
+        └── share.sh       ← deploy HTML to Vercel for sharing
 ```
+
+**Output:** `~/.agent/diagrams/filename.html` → opens in browser
 
 The skill routes to the right approach automatically: Mermaid for flowcharts and diagrams, CSS Grid for architecture overviews, HTML tables for data, Chart.js for dashboards.
 

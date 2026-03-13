@@ -5,13 +5,28 @@ license: MIT
 compatibility: Requires a browser to view generated HTML files. Optional agent-browser for web screenshots and captures.
 metadata:
   author: nicobailon
-  version: "0.5.0"
+  version: "0.5.1"
 ---
 
 # Visual Explainer
 
 Generate self-contained HTML files for technical diagrams, visualizations, and data tables when the user explicitly requests visual output.
 
+
+## Available Commands
+
+Detailed prompt templates in `./commands/`. In Pi, these are slash commands (`/diff-review`). In Claude Code, namespaced (`/visual-explainer:diff-review`). In Codex, use `/prompts:diff-review` (if installed to `~/.codex/prompts/`) or invoke `$visual-explainer` and describe the workflow.
+
+| Command | What it does |
+|---------|-------------|
+| `generate-web-diagram` | Generate an HTML diagram for any topic |
+| `generate-visual-plan` | Generate a visual implementation plan for a feature |
+| `generate-slides` | Generate a magazine-quality slide deck |
+| `diff-review` | Visual diff review with architecture comparison and code review |
+| `plan-review` | Compare a plan against the codebase with risk assessment |
+| `project-recap` | Mental model snapshot for context-switching back to a project |
+| `fact-check` | Verify accuracy of a document against actual code |
+| `share` | Deploy an HTML page to Vercel and get a live URL |
 
 ## Workflow
 
@@ -82,6 +97,8 @@ Vary the choice each time. If the last diagram was dark and technical, make the 
 **Mermaid theming:** Always use `theme: 'base'` with custom `themeVariables` so colors match your page palette. Use `layout: 'elk'` for complex graphs (requires the `@mermaid-js/layout-elk` package — see `./references/libraries.md` for the CDN import). Override Mermaid's SVG classes with CSS for pixel-perfect control. See `./references/libraries.md` for full theming guide.
 
 **Mermaid containers:** Always center Mermaid diagrams with `display: flex; justify-content: center;`. Add zoom controls (+/−/reset/expand) to every `.mermaid-wrap` container. Include the click-to-expand JavaScript so clicking the diagram (or the ⛶ button) opens it full-size in a new tab.
+
+**⚠️ Never use bare `<pre class="mermaid">`.** It renders but has no zoom/pan controls — diagrams become tiny and unusable. Always use the full `diagram-shell` pattern from `templates/mermaid-flowchart.html`: the HTML structure (`.diagram-shell` > `.mermaid-wrap` > `.zoom-controls` + `.mermaid-viewport` > `.mermaid-canvas`), the CSS, and the ~200-line JS module for zoom/pan/fit. Copy it wholesale.
 
 **Mermaid scaling:** Diagrams with 10+ nodes render too small by default. For 10-12 nodes, increase `fontSize` in themeVariables to 18-20px and set `INITIAL_ZOOM` to 1.5-1.6. For 15+ elements, don't try to scale — use the hybrid pattern instead (simple Mermaid overview + CSS Grid cards). See "Architecture / System Diagrams" below.
 
