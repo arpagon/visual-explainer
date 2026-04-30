@@ -367,25 +367,31 @@ Every diagram is a single self-contained `.html` file. No external assets except
 
 ## Sharing Pages
 
-Upload visual explainer pages to Google Cloud Storage via `upload.py`. Generates a UUIDv7-based filename and returns a permanent public URL.
+Upload visual explainer pages (y assets opcionales) a S3 via `upload.py`. Todos los archivos de un batch comparten el mismo UUID folder.
 
 **Usage:**
 ```bash
-uv run {{skill_dir}}/scripts/upload.py <html-file>
+# Solo HTML
+uv run {{skill_dir}}/scripts/upload.py diagram.html
+
+# HTML + assets (imágenes, videos, etc.) — mismo UUID folder
+uv run {{skill_dir}}/scripts/upload.py diagram.html hero.png clip.mp4
+
+# Conservar indefinidamente (sin tag ttl, no se borra)
+uv run {{skill_dir}}/scripts/upload.py --keep diagram.html
 ```
 
-**Example:**
-```bash
-uv run ~/.pi/agent/skills/visual-explainer/scripts/upload.py ~/.agent/diagrams/my-diagram.html
-
-# Output:
-# https://storage.googleapis.com/your-bucket/diagrams/019538a2-....html
+**Output:** una URL pública por archivo, en orden:
+```
+https://emilia-vision-agents.s3.amazonaws.com/arpagon/host/pi/<uuid>/diagram.html
+https://emilia-vision-agents.s3.amazonaws.com/arpagon/host/pi/<uuid>/hero.png
 ```
 
 **How it works:**
-1. Generates a UUIDv7-based filename for uniqueness and time-ordering
-2. Uploads to the configured GCS bucket
-3. Returns the public URL immediately
+1. Genera un UUIDv7 compartido para todos los archivos del batch
+2. Sube cada archivo a `<user>/<hostname>/<harness>/<uuid>/` con su Content-Type correcto
+3. Por defecto añade tag `ttl=30d` → lifecycle rule borra a los 30 días automáticamente
+4. Con `--keep` omite el tag y los objetos persisten indefinidamente
 
 **Configuration:**
 
@@ -397,12 +403,11 @@ uv run ~/.pi/agent/skills/visual-explainer/scripts/upload.py ~/.agent/diagrams/m
 
 Usa las credenciales AWS del sistema (`~/.aws/credentials` o variables `AWS_*`). No requiere key file.
 
-**Path generado:** `s3://<bucket>/<user>/<hostname>/<harness>/<uuid7>/<slug>.html`
-
 **Notes:**
-- URLs are permanent and publicly accessible
-- Files are time-ordered thanks to UUIDv7
-- If `VE_GCS_BUCKET` is not set, the upload will fail with a clear error
+- URLs son públicas e inmediatas
+- Sin `--keep`: los objetos expiran a los 30 días (lifecycle rule por tag `ttl=30d`)
+- Con `--keep`: persisten indefinidamente
+- Archivos time-ordered gracias a UUIDv7
 
 See `./commands/share.md` for the `/share` command template.
 
