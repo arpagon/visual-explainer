@@ -1,20 +1,33 @@
 # /// script
 # requires-python = ">=3.10"
-# dependencies = ["google-cloud-storage", "uuid7"]
+# dependencies = ["boto3", "uuid7"]
 # ///
-"""Upload an HTML diagram to GCS and print a public URL."""
+"""Upload an HTML diagram to S3 and print a public URL.
+
+Path structure:
+  s3://<bucket>/<user>/<hostname>/<harness>/<uuid7>/<slug>.html
+
+Environment variables:
+  VE_S3_BUCKET   — bucket name (required)
+  VE_S3_REGION   — AWS region (default: us-east-1)
+  VE_HARNESS     — harness name for path segment (default: pi)
+"""
 
 import os
+import socket
 import sys
 from pathlib import Path
 
-from google.cloud import storage
+import boto3
 from uuid_extensions import uuid7str
 
-BUCKET = os.environ.get("VE_GCS_BUCKET", "")
-PREFIX = os.environ.get("VE_GCS_PREFIX", "diagrams")
-SA_KEY = Path(os.environ.get("VE_GCS_SA_KEY", Path(__file__).parent / "gcs-sa.json"))
-PUBLIC_URL = f"https://storage.googleapis.com/{BUCKET}"
+BUCKET  = os.environ.get("VE_S3_BUCKET", "")
+REGION  = os.environ.get("VE_S3_REGION", "us-east-1")
+HARNESS = os.environ.get("VE_HARNESS", "pi")
+USER    = os.environ.get("USER") or os.environ.get("USERNAME") or "unknown"
+HOST    = socket.gethostname()
+
+PUBLIC_URL = f"https://{BUCKET}.s3.amazonaws.com"
 
 
 def main() -> None:
@@ -23,26 +36,27 @@ def main() -> None:
         sys.exit(1)
 
     local_file = Path(sys.argv[1])
+
     if not local_file.exists():
         print(f"Error: file not found: {local_file}", file=sys.stderr)
         sys.exit(1)
 
     if not BUCKET:
-        print("Error: VE_GCS_BUCKET env var is not set", file=sys.stderr)
+        print("Error: VE_S3_BUCKET env var is not set", file=sys.stderr)
         sys.exit(1)
 
-    if not SA_KEY.exists():
-        print(f"Error: SA key not found: {SA_KEY}", file=sys.stderr)
-        sys.exit(1)
+    slug = local_file.stem
+    key  = f"{USER}/{HOST}/{HARNESS}/{uuid7str()}/{slug}.html"
 
-    slug = local_file.stem  # e.g. "vta-capacity-planning"
-    blob_name = f"{PREFIX}/{uuid7str()}/{slug}.html"
+    client = boto3.client("s3", region_name=REGION)
+    client.upload_file(
+        str(local_file),
+        BUCKET,
+        key,
+        ExtraArgs={"ContentType": "text/html"},
+    )
 
-    client = storage.Client.from_service_account_json(str(SA_KEY))
-    blob = client.bucket(BUCKET).blob(blob_name)
-    blob.upload_from_filename(str(local_file), content_type="text/html")
-
-    print(f"{PUBLIC_URL}/{blob_name}")
+    print(f"{PUBLIC_URL}/{key}")
 
 
 if __name__ == "__main__":

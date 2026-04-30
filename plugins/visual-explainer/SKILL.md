@@ -391,9 +391,13 @@ uv run ~/.pi/agent/skills/visual-explainer/scripts/upload.py ~/.agent/diagrams/m
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `VE_GCS_BUCKET` | GCS bucket name | *(required)* |
-| `VE_GCS_PREFIX` | Blob prefix / folder | `diagrams` |
-| `VE_GCS_SA_KEY` | Path to SA JSON key | `scripts/gcs-sa.json` |
+| `VE_S3_BUCKET` | S3 bucket name | *(required)* |
+| `VE_S3_REGION` | AWS region | `us-east-1` |
+| `VE_HARNESS` | Harness name for path segment | `pi` |
+
+Usa las credenciales AWS del sistema (`~/.aws/credentials` o variables `AWS_*`). No requiere key file.
+
+**Path generado:** `s3://<bucket>/<user>/<hostname>/<harness>/<uuid7>/<slug>.html`
 
 **Notes:**
 - URLs are permanent and publicly accessible
