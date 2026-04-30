@@ -383,8 +383,8 @@ uv run {{skill_dir}}/scripts/upload.py --keep diagram.html
 
 **Output:** una URL pública por archivo, en orden:
 ```
-https://emilia-vision-agents.s3.amazonaws.com/arpagon/host/pi/<uuid>/diagram.html
-https://emilia-vision-agents.s3.amazonaws.com/arpagon/host/pi/<uuid>/hero.png
+https://<VE_S3_BUCKET>.s3.amazonaws.com/arpagon/host/pi/<uuid>/diagram.html
+https://<VE_S3_BUCKET>.s3.amazonaws.com/arpagon/host/pi/<uuid>/hero.png
 ```
 
 **How it works:**
