@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a browser to view generated HTML files. Optional agent-browser for web screenshots and captures.
 metadata:
   author: nicobailon
-  version: "0.5.1"
+  version: "0.6.3"
 ---
 
 # Visual Explainer
@@ -34,7 +34,7 @@ Detailed prompt templates in `./commands/`. In Pi, these are slash commands (`/d
 
 Before writing HTML, commit to a direction. Don't default to "dark theme with blue accents" every time.
 
-**Visual treatment when requested.** When the user asks for a visual page, essays, blog posts, and articles get full visual treatment — extract structure into cards, diagrams, grids, tables.
+**Visual treatment on request only.** Generate HTML only when the user explicitly asks for a visual page, diagram, or explanation. Do not proactively convert essays, blog posts, tables, or other content — the user decides when to use this skill.
 
 Prose patterns (lead paragraphs, pull quotes, callout boxes) are **accent elements** within visual pages, not a separate mode. Use them to highlight key points or provide breathing room, but the page structure remains visual.
 
@@ -367,7 +367,7 @@ Every diagram is a single self-contained `.html` file. No external assets except
 
 ## Sharing Pages
 
-Upload visual explainer pages to Google Cloud Storage for instant sharing via public URL.
+Upload visual explainer pages to Google Cloud Storage via `upload.py`. Generates a UUIDv7-based filename and returns a permanent public URL.
 
 **Usage:**
 ```bash
@@ -376,7 +376,7 @@ uv run {{skill_dir}}/scripts/upload.py <html-file>
 
 **Example:**
 ```bash
-uv run {{skill_dir}}/scripts/upload.py ~/.agent/diagrams/my-diagram.html
+uv run ~/.pi/agent/skills/visual-explainer/scripts/upload.py ~/.agent/diagrams/my-diagram.html
 
 # Output:
 # https://storage.googleapis.com/your-bucket/diagrams/019538a2-....html
@@ -387,23 +387,18 @@ uv run {{skill_dir}}/scripts/upload.py ~/.agent/diagrams/my-diagram.html
 2. Uploads to the configured GCS bucket
 3. Returns the public URL immediately
 
-**Configuration (environment variables):**
+**Configuration:**
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `VE_GCS_BUCKET` | GCS bucket name | *(required)* |
 | `VE_GCS_PREFIX` | Blob prefix / folder | `diagrams` |
-| `VE_GCS_SA_KEY` | Path to service account JSON | `scripts/gcs-sa.json` |
-
-**Requirements:**
-- `uv` (Python package runner)
-- GCS service account with write access to the bucket
-- Bucket configured for public read access
+| `VE_GCS_SA_KEY` | Path to SA JSON key | `scripts/gcs-sa.json` |
 
 **Notes:**
 - URLs are permanent and publicly accessible
-- Files are ordered by time thanks to UUIDv7
-- If env vars are not set, sharing is skipped silently
+- Files are time-ordered thanks to UUIDv7
+- If `VE_GCS_BUCKET` is not set, the upload will fail with a clear error
 
 See `./commands/share.md` for the `/share` command template.
 
