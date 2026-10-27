@@ -1,5 +1,194 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.14.0] - 2026-10-18
+
+### Highlights
+- Pages check themselves. Every render opens the page in a browser, lists real layout problems like overlapping text, labels a line runs through, or text too small to read on a phone, and gives the agent one contact sheet to look at. Agents no longer write their own browser scripts, and a page takes about 23% fewer turns.
+- Explainers move when motion helps. A process, a flow, or a change of state gets a step-through or a replay without you asking for it.
+- Mermaid works offline and matches the page. A diagram written in Mermaid is drawn when the page is built, in the page's colors and fonts, with its own phone layout and nothing to load.
+- Less to read. An agent reads about 16% less guidance for a page without motion, and the main skill file is about 15% shorter.
+
+### Added
+- Rendering a page now looks at it in a browser when Chrome and `playwright-core` are available. It reports script errors, sideways scrolling, labels under 12 px, text that overlaps other text or runs past its drawing, labels a border or line runs through, and headings that sit on the figure below, at every step of a step-through too. It also saves a contact sheet with the first screen, each figure, and each step. Pi and MCP show the sheet to the agent; elsewhere the render prints its path. Without a browser, or when a page is slow or offline, the check is skipped with one line and the render still succeeds.
+- Kit classes for a dashed boundary, queue and worker slots, chart axes, and tables, which pages used to style by hand.
+
+### Changed
+- Explainers animate wherever motion helps the reader understand a process, a flow, or a change of state, without being asked. Step-throughs, replays, flow dots, and live figures are the default there; a slide deck, a video, and PPTX still need a request.
+- Agents read about 16% less for a page without motion, and no longer open the kit's source to look things up. Step-throughs, replays, live figures, and 3D have their own guide that agents read only when a figure moves.
+- The main skill file is about 15% shorter. Images, Mermaid, PPTX, and the older recipes moved to the guides that need them, and checks the renderer now does left the delivery checklist.
+- Mermaid diagrams are drawn when the page is built, by [Pele](https://github.com/obsidianmd/pele) from Obsidian, instead of by Mermaid.js from a CDN when the page opens. The diagram works offline, follows theme switches, gets its own phone layout, and is checked like any other figure. A Mermaid syntax error or a missing `aria-label` stops the render and names the line. Pele ships inside the skill, so there is nothing to install. Mermaid is still used only when you ask for it; hand-drawn figures stay the default.
+- Wide drawings keep their labels readable on a phone without the agent working out the scale. Every drawing gets `role="img"`, and a drawing without an `aria-label` stops the render.
+
+### Fixed
+- A section that opens with a small label above its heading no longer sits flush on the figure below.
+- Running `kit/render.mjs` or `plan/render.mjs` through a symlinked skill folder no longer exits without writing anything.
+
+### Removed
+- `kit/check.mjs`. Rendering a page runs the same checks and more.
+
+## [0.13.0] - 2026-10-17
+
+### Highlights
+- Talk back to any page. Select words or click part of a diagram to comment or ask, then send one reply. In Pi it goes straight into the chat; elsewhere it is copied for you to paste.
+- Plans you answer in the page. `/generate-visual-plan` draws the change, lets you pick options and mark the agent's guesses, and sends back one response. After the build, the same page shows what was built.
+- Narrated videos. `/generate-video` turns an explainer into a 1080p MP4 with voice-over, or records a walkthrough of a live web app.
+- Animated state machines. An explainer about a job queue, a workflow, or anything else with states can replay it one event at a time: the route each event takes lights up, a dot travels along it, queues fill and drain, and each step's caption says why it happened. Inspired by the animated state-machine diagrams in [hapsland](https://github.com/dearlordylord/hapsland) by Igor Loskutov ([@dearlordylord](https://github.com/dearlordylord)).
+- About 60% fewer tokens. An agent reads about 60% less guidance for a diagram and writes about 60% less per page, the always-on tool descriptions in Pi and MCP are shorter, and revisions are small edits instead of rewrites.
+
+### Added
+- `/generate-video` makes a narrated MP4. The agent writes a video deck whose scenes carry their narration, and `visual-explainer-video` records it at 1080p on a virtual clock, so motion never stutters and each picture appears with its sentence. Narration comes from ElevenLabs, Seed Audio, OpenAI, or xAI when a key is set; without one, the video is silent with captions. `--stills` saves one picture per scene to check first. The same command can record a walkthrough of a live web app. It needs ffmpeg and `playwright-core`, which you install separately so everyone else's install stays small.
+- `/generate-visual-plan` makes a plan you answer in the page instead of a page you only read. It opens on the change as a drawing whose numbered parts match a short list of claims. You pick options for the decisions the agent cannot make alone, mark its guesses right or wrong, comment on any words you select, then approve or request changes. Changing an option redraws the figure. Keyboard shortcuts and saved answers make long plans quick to get through.
+- After the build, the same plan becomes a receipt: each claim shows whether it was built, changed, or dropped, next to the check that proves it.
+- Plans are written with a few short tags. The renderer reads the cited code from your repository and stops on file paths or line numbers that do not exist. Boxes-and-arrows diagrams (`<ve-flow>`) are laid out for the agent, so it no longer places coordinates by hand.
+- `/compare` draws two or more options side by side, recommends one, and lets you pick in the page; your pick comes back to the agent in the reply.
+- Any page can be answered, not only plans. Select words or click part of a figure to comment or ask, and a quiet Reply button gathers your notes into one reply. `<ve-ask>` puts a question with options on any page, and your answer joins the reply. In Pi, a page opened in a Glimpse window sends the reply straight into the chat when you press Send to agent; elsewhere it is copied for you to paste.
+- Diagrams carry their numbers and notes on the drawing. A wait, a size, or a time window is drawn as a dimension line on the span it measures. Numbered callouts match the steps of a step-through. A finding that lives in one small part, such as file permission bits, gets a close-up of that part.
+- A step-through can replay a state machine one event at a time. The whole machine stays drawn while each event lights the route it took and dots run along it. Queues fill and drain, worker slots fill and free up, and counts change in place. Each caption says why the event happened and cites the code behind it. `examples/replay-job-queue.html` shows all of it.
+- `<ve-bars>`, `<ve-waffle>`, and `<ve-stack>` turn a few numbers into a chart, with units on every label and one scale across charts that share a `max`. `<ve-flow>` works on any page too. Hand-drawn diagrams stay the default.
+- Pages are written as a short source, `<name>.src.html`, with one kit line in its head; the renderer adds the shared styles, fonts, diagram parts, and script. The reference page takes 64% fewer tokens to write, and renders the same. Pi `render` and MCP `visual_explainer_render_html` take the source as `path`; elsewhere, run `node kit/render.mjs <name>.src.html`.
+- Revisions, including `/fact-check` corrections, are small edits to the kept source and a new render; the agent never writes the whole page again.
+- One kit carries all four looks. `data-register` on `<html>` picks Instrument, Blueprint, Paper, or Editorial, with its fonts and light and dark colors.
+- Every render reports its figures, uncaptioned figures, tags, and prose words in one line, and a mistake in a tag stops the render and names its line. `node kit/check.mjs page.html` opens the page in Chrome at phone and desktop widths and reports script errors, sideways scrolling, and labels under 12 px.
+- The MCP server serves the skill's reference docs as resources, so a client that cannot read files can follow them.
+
+### Changed
+- `/plan-review` writes its review as a plan page: each finding comes with evidence from the code and a suggested fix you accept or reject, and your answers come back as one response.
+- `/diff-review` asks about each risk worth fixing, so your reply comes back as the list of fixes to make. On someone else's PR it drafts review comments and never posts them. `/project-recap` ends by asking where to start. Both chart sizes and churn with the new data tags.
+- The guidance an agent reads for a diagram is about 60% shorter, and the always-on tool descriptions in Pi and MCP are shorter too.
+- A page opened in a Pi Glimpse window now closes when the session ends, as plan windows do.
+- A printed page uses its own look's colors on white, not the default amber.
+
+### Removed
+- `--quick` mode, along with Pi `action: "render_quick"` and MCP `visual_explainer_render_quick`. A full page now costs about as little to write, and it gets replies, the four looks, and the page checks that quick pages lacked. Drop `--quick` from any saved prompts.
+
+### Fixed
+- Section navigation on narrow screens no longer shows a grey scrollbar under the links. The links scroll with a faded edge, and buttons such as a skim toggle stay in place.
+- Sources at the end of a page are always visible, in their own section at full size, instead of hidden behind a small grey toggle.
+- In Pi, pressing Send to agent in a Glimpse plan window after `/new`, `/resume`, `/fork`, or `/reload` no longer crashes pi. Thanks to [@masonc15](https://github.com/masonc15) for #112.
+- A `VISUAL_EXPLAINER_OUTPUT_DIR` that passes through a symlink is now rejected before the directory is created, and the error shows where the path really leads, such as `/private/tmp` for `/tmp` on macOS. The default `~/.agent/diagrams/` still follows a symlinked `~/.agent`. Thanks to [@tharanee-bit](https://github.com/tharanee-bit) for #115.
+- Pages that use `$$` outside math, such as a `$$` query helper in a script or prices like `$$5`, no longer break on render. Thanks to [@tharanee-bit](https://github.com/tharanee-bit) for #115.
+- The reference page's small failure-mode diagrams drew their lower labels at 11.4 px on wide screens; they are now 12.3 px or more at every width.
+
+## [0.12.0] - 2026-10-02
+
+### Highlights
+- Pages now lead with the answer as a picture and one sentence, and every section is built around a figure instead of paragraphs.
+- Diagrams are hand-drawn to match the page. They can step through a process, show traffic flowing along edges, and light up when you hover a term in the text. Mermaid is used only when you ask for it.
+- Live figures let readers drag a slider or flip a toggle and watch the diagram, numbers, and headline update.
+- Four built-in looks (Instrument, Blueprint, Paper, Editorial) with magazine-grade type and layout, readable contrast in light and dark, and a subtle touch of each page's topic.
+- The skill is about 60% smaller, so agents read less and follow it more closely.
+
+### Added
+- Live figures: one to three controls recompute the diagram, numbers, and headline from one model. A policy toggle can show how a bad rule produces an attractive wrong answer. Thanks to [@zanzipanzi](https://github.com/zanzipanzi) for #96.
+- Step-by-step and animated explainers: a stepper and scene player that build a diagram one part at a time, plus guidance for a narrated video when you ask for one.
+- Linked highlighting: hovering or focusing a term in the text lights up the matching parts of the figure and table rows.
+- Small multiples, waffle charts, bars, and sparklines, so every number and every set of cases gets a picture.
+- three.js figures for data where depth carries meaning, such as embeddings, spatial layouts, and geometry.
+- The Pi `visual_explainer` tool now saves to `VISUAL_EXPLAINER_OUTPUT_DIR` when it is set, like the MCP server. The default stays `~/.agent/diagrams/`, and `/fact-check` looks in the same place. Thanks to [@eaxeax](https://github.com/eaxeax) for #99.
+- The repository works as an [Agent Plugins](https://agent-plugins.org/) 1.0.0 plugin, so compatible clients can discover the skill without a client-specific install. Thanks to [@gunzip](https://github.com/gunzip) for #100.
+
+### Changed
+- The skill is rewritten to be figure-first and about 61% smaller. The first screen shows the answer, figures lead every section, and the writing is short and plain.
+- Every diagram is hand-drawn SVG, including sequence and schema diagrams. The skill no longer chooses Mermaid on its own. When you ask for Mermaid, a short rule covers theming, labels, and sizing.
+- A new style guide defines four looks (Instrument, Blueprint, Paper, Editorial), each with its own fonts and a light and dark palette where all text meets 4.5:1 contrast. Typography, layout, and chart rules draw on Bringhurst, Butterick, Müller-Brockmann, Tufte, Datawrapper, and the FT Visual Vocabulary.
+- Pages pick up a subtle motif from their subject, such as an accent color, a texture, or a diagram convention.
+- Figures look crafted rather than flat: raised nodes, shapes that show what a thing is (a cylinder for a database), a highlight on the key element, and gentle entrance motion. Reduced motion, print, and no-JS show the final state.
+- Page structure is flexible: concept explainers, visual plans, reviews, comparisons, essays, and single-diagram pages each get a suggested shape.
+- Theme palettes raise dim text wherever it was below 4.5:1 contrast.
+
+### Removed
+- The old reference files (`css-patterns.md`, `libraries.md`, `responsive-nav.md`, `slide-patterns.md`, `mermaid.md`) and the architecture, Mermaid, and data-table templates. One reference page replaces the templates. The old files stay available as optional links pinned to v0.11.0.
+
+### Fixed
+- Page styles no longer shrink or restyle Mermaid diagram labels. Thanks to [@vnakhate](https://github.com/vnakhate) for #98.
+- Slide resume no longer stops between slides and works on local `file://` pages. The outline and help dialog has an accessible name again.
+
+### Security
+- Pi renders are written to a temporary file and moved into place, like MCP renders, so a file swapped for a symlink cannot redirect the write. Re-rendering a file keeps its permissions.
+
+## [0.11.0] - 2026-08-28
+
+### Highlights
+- MCP users can choose where local HTML renders are saved without losing the default safe output directory.
+- Install instructions are clearer across Cursor, Antigravity, Codex, and OpenCode, including safer Windows copy commands.
+- Release metadata now has a guardrail so package and plugin versions stay in sync.
+- Slide decks make over-budget content easier to spot during reduced-motion review.
+- Local `file://` previews are quieter and more reliable when using the responsive table of contents.
+
+### Added
+- Added optional `VISUAL_EXPLAINER_OUTPUT_DIR` support for MCP renders. The default remains `~/.agent/diagrams/`, and custom directories still stay inside a local output jail. Requested by [@bertheto](https://github.com/bertheto) in #88.
+- Added rem-based type-scale guidance for non-slide, scrollable pages, with copyable role selectors and readable minimums. Based on PR #95 by [@ZanziPanzi](https://github.com/ZanziPanzi).
+
+### Compatibility
+- Documented native Cursor global and workspace skill paths, plus staged PowerShell install commands with rollback for Antigravity, Codex, and OpenCode. Credit: [@bertheto](https://github.com/bertheto) for #86/#90.
+
+### Fixed
+- Fixed the stale nested Claude plugin version that made Claude Code report the wrong latest version after `0.10.0`, and added a version check across package, marketplace, plugin, and skill metadata. Reported by [@proxet-p35](https://github.com/proxet-p35) in #93.
+- Added a reduced-motion slide budget check that marks vertical overflow and `autoFit()` fallbacks instead of silently clipping or shrinking over-budget content. Reported by [@bertheto](https://github.com/bertheto) in #92.
+- Guarded the responsive-nav table-of-contents history update for `file://` pages so local scrolling still works without console errors. Based on PR #94 by [@ZanziPanzi](https://github.com/ZanziPanzi).
+
+## [0.10.0] - 2026-08-20
+
+### Highlights
+- Visual explanations now choose a calmer or more expressive treatment based on the request instead of defaulting to the same look every time.
+- Repo-aware pages now prefer the project's own design language before falling back to built-in visual directions.
+- Diagrams now get stronger guidance on what to show, not just how to render Mermaid.
+- The skill now includes a clearer accessibility and dual-theme baseline for generated pages.
+
+### Added
+- Added design-judgment guidance for matching the visual treatment to the request, planning a specific design before writing HTML, and avoiding generic generated-page patterns.
+- Added project design-system precedence so repo-anchored pages can follow existing theme tokens, component styles, and visual vocabulary.
+- Added content-anchored aesthetic directions for CLI, infrastructure, metrics, architecture, recap, and prose-heavy pages.
+- Added diagram rhetoric guidance that asks diagrams to show the mechanism, label arrows, compare differences directly, and make one clear claim per figure.
+- Added craft guidance for dual color schemes, type setting, neutrals, spacing, microcopy, dashboard readability, keyboard focus states, and diagram captions.
+
+### Fixed
+- Synchronized Claude Code marketplace and skill metadata versions after the mismatch reported by @romkazor in #83.
+
+## [0.9.0] - 2026-08-13
+
+### Added
+- Added a best-effort static PPTX export utility for simple HTML slide decks. It extracts slide text, bullets, simple tables, code blocks, and diagram placeholders while keeping HTML as the source of truth. Requested by @romkazor in #50.
+- Added a local stdio MCP server that exposes render tools, bundled prompt templates, and read-only skill resources without HTTP, auth, remote storage, or LLM calls. Requested by @luketych in #33.
+- Added VS Code Copilot and Copilot CLI custom-instruction guidance that points to the canonical skill without claiming native Copilot support. Reported in #8 by @Tal94NICE, with ideas from @davida26 and @jcespinoza.
+- Added optional Markdown companion guidance for explicitly requested AI-readable output or source briefs. Companions sit beside HTML output and never become its source. Requested by @mrns in #34.
+- Added opt-in `--quick` rendering for web diagrams, diff reviews, plan reviews, and project recaps. Agents emit a compact validated JSON spec, and the bundled renderer creates complete HTML through the existing Pi tool or a local script fallback. Based on the original RFC idea and PR #12 by @mikeyobrien.
+- Added Antigravity CLI install guidance using its native Agent Skills paths, replacing the blocked consumer Gemini CLI support path. Reported by @chadbr in #6.
+- Added an optional Glimpse viewer for Pi renders through `visual_explainer` with `viewer: "glimpse"` or `viewer: "auto"`. Requested by @bjesuiter in #55 and prototyped in PR #56.
+- Added a standard self-contained favicon to rendered pages and reference templates. Based on PR #62 by @zereraz.
+- Added reader-first slide deck navigation with an expandable side rail, outline/help overlays, deep links, reading percent, and resume state. Based on PR #65 and PR #67 by @zereraz.
+- Added an optional runtime theme and font picker with eleven prebuilt palettes in `references/themes.md`, deriving all Mermaid `themeVariables` and the diagram label font from the active selection so diagrams stay consistent with the page. Font pairs are drawn from the families the skill already recommends. Rebuilt smaller from PR #42 by @turkycat.
+
+### Fixed
+- Fixed expanded-diagram exports painting a fixed background color rather than the live page palette, so an exported diagram matches the page it came from.
+- Kept slide-deck content visible in no-JS previews such as QuickLook by gating entrance-hidden states on JavaScript availability. Reported by @bradleyy in #68.
+- Hardened Pi render output with missing `html lang`, missing viewport metadata, and display-math escaping for raw `<` / `>` inside `$$...$$`. Based on PR #65 and PR #67 by @zereraz.
+- Added font-weight guidance so copied Google Fonts examples load each rendered weight, including mono labels. Based on PR #60 by @jowcy.
+- Added small maintenance fixes for `node_modules/` ignores, slide-deck button types, output-directory symlink checks, and older changelog ordering. Based on PR #66 by @fix2015.
+
+## [0.8.2] - 2026-08-13
+
+### Added
+- Added Pi package gallery image metadata using `banner.png`.
+
+## [0.8.1] - 2026-06-25
+
+### Fixed
+- Removed the invalid Claude Code plugin `skills: ["./"]` manifest entry so the marketplace plugin no longer trips the `Path escapes plugin directory` loader error. Reported by @aidansommers in #49, @fessygaspard-cpu in #51, @frntman in #58, and @syxc in #59, with confirmations and follow-up from @MauricioCorzo, @umar-s, @marcuslannister, and @NikiforovAll.
+- Added the required `description` frontmatter to the canonical `visual-explainer` skill so Agent Skills loaders can discover it without metadata warnings.
+- Added explicit `name` frontmatter to bundled command templates for loaders that do not infer command names from filenames. Based on the NLPM audit reports #46 and #48 and PR #43 from @xiaolai.
+- Updated the canonical Mermaid SVG insertion pattern to parse rendered SVG through the lenient HTML parser instead of assigning `innerHTML`, preserving Mermaid 10+/11 `foreignObject` labels while avoiding common scanner warnings. Based on issue #37 and PR #54 from @thomnico.
+
+## [0.8.0] - 2026-06-24
+
+### Added
+- Added one Pi extension tool, `visual_explainer`, with `prepare` for permission-aware visual explanation planning and optional subagent scouting, plus `render` for writing and opening generated HTML pages while keeping `/generate-web-diagram` as a prompt template.
+
+### Changed
+- Compressed the visual-explainer skill and command prompts from 10,824 words to 2,131 words, an 80%+ reduction in prompt tokens, while preserving the hard rendering, Mermaid, table, slide, and review-section requirements.
+
 ## [0.7.1] - 2026-04-27
 
 ### Compatibility
@@ -9,8 +198,6 @@
 - Documented migration cleanup for older manual Pi installs, which can otherwise shadow package resources with copied user-level skill and prompt files.
 
 ### Changed
-- Completed the hard cutover from `/share` to `/share-page` by removing the deprecated command template and updating docs and installer output.
-- Removed `{{skill_dir}}` placeholders from canonical skill docs; share instructions now resolve `share.sh` from the installed `visual-explainer` skill directory.
 - Made `pi install` the primary Pi installation path while keeping the legacy installer documented as an explicit copied-file alternative.
 
 ## [0.6.3] - 2026-03-09
@@ -97,18 +284,10 @@ Based on PR #25 by [@peak-flow](https://github.com/peak-flow), with additional m
 - Added install instructions for OpenAI Codex to README
 - Uses `~/.agents/skills` and `~/.agents/commands` paths
 
-### Share Command
-- New `/share` prompt and `scripts/share.sh` for instant sharing of visual explainer pages
-- Uses vercel-deploy skill — no account or authentication required
-- Zero-friction: just `bash scripts/share.sh mypage.html` → live URL in seconds
-- Returns claimable deployment (can transfer to your Vercel account later)
-- JSON output for programmatic use
-
 ### Bug Fixes
 - Fixed pi skill loading: scoped `pi.skills` to `./SKILL.md` instead of `./` (was trying to load README.md and CHANGELOG.md as skills)
 - Fixed Mermaid line breaks: use `<br/>` instead of `\n` in flowchart labels (renders as literal text otherwise)
 - Fixed `mermaid-flowchart.html` to match documented pattern: moved flex centering from `.mermaid-wrap .mermaid` to `.mermaid-wrap`, added `min-height: 400px`
-- Fixed `share.sh` to properly capture and display deployment errors (was silently exiting due to `set -e`)
 
 ## [0.4.5] - 2026-03-04
 
@@ -132,6 +311,14 @@ Based on PR #25 by [@peak-flow](https://github.com/peak-flow), with additional m
 - Updated `SKILL.md` to explicitly mention the click-to-expand feature and expand button so agents include it when generating pages
 - Updated all prompt templates (`diff-review.md`, `plan-review.md`, `project-recap.md`, `generate-visual-plan.md`) to specify the expand button and click-to-expand functionality for Mermaid diagrams
 
+## [0.4.4] - 2026-03-02
+
+### Hybrid Architecture Pattern
+- New pattern for complex architectures (15+ elements): simple Mermaid overview (5-8 nodes) + CSS Grid cards for details
+- Updated "Architecture / System Diagrams" section in SKILL.md with three-tier approach based on complexity
+- Reduced max Mermaid node count from 15-20 to 10-12 in `libraries.md`
+- Updated Mermaid scaling guidance to recommend hybrid pattern over scaling tricks for complex diagrams
+
 ## [0.4.3] - 2026-03-01
 
 ### Mermaid Zoom and Positioning Fixes
@@ -142,14 +329,6 @@ Based on PR #25 by [@peak-flow](https://github.com/peak-flow), with additional m
 - Removed unnecessary `.mermaid-inner` wrapper — no longer needed with zoom-based approach.
 - Updated JavaScript to use `INITIAL_ZOOM` constant for consistent reset behavior.
 - Updated "Scaling Small Diagrams" section to use `zoom` instead of `transform: scale()` for consistency.
-
-## [0.4.4] - 2026-03-02
-
-### Hybrid Architecture Pattern
-- New pattern for complex architectures (15+ elements): simple Mermaid overview (5-8 nodes) + CSS Grid cards for details
-- Updated "Architecture / System Diagrams" section in SKILL.md with three-tier approach based on complexity
-- Reduced max Mermaid node count from 15-20 to 10-12 in `libraries.md`
-- Updated Mermaid scaling guidance to recommend hybrid pattern over scaling tricks for complex diagrams
 
 ## [0.4.2] - 2026-03-01
 
