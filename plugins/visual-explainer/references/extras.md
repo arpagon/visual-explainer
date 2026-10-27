@@ -4,7 +4,7 @@ Only when the user asks for it or supplies its source, on kit pages. Put the sou
 
 ## Images
 
-Optional, for a hero or concept art when `surf` or another image tool exists; never for data or structure. Never write base64 yourself: put `<img src="hero.png" alt="…">` in the source and, after each render, run:
+Optional, for a real screenshot of a web page, UI, or running app when `agent-browser` is available (`agent-browser open <url>`, then `agent-browser screenshot hero.png`); never AI-generated art, and never for data or structure. Never write base64 yourself: put `<img src="hero.png" alt="…">` in the source and, after each render, run:
 
 ```sh
 node -e 'const fs=require("fs"),[f,i]=process.argv.slice(1);fs.writeFileSync(f,fs.readFileSync(f,"utf8").replace(`src="${i}"`,`src="data:image/png;base64,${fs.readFileSync(i,"base64")}"`))' <name>.html hero.png

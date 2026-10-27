@@ -18,6 +18,11 @@ preferences:
       o directivas agresivas similares.
       Las tablas, ensayos y otro contenido NO deben convertirse en HTML automáticamente.
       El usuario decide cuándo usar este skill.
+      Desde v0.14: el `description` del frontmatter debe decir "Use only when the
+      user explicitly asks"; la regla "A terminal table of 4+ rows ... becomes a page"
+      se reemplaza por una regla opt-in; y en extension.ts se quita el
+      promptGuideline "offer a visual explanation" (nunca ofrecer por iniciativa propia).
+      Las animaciones dentro de una página ya pedida (steppers, replays) sí se permiten.
 
   - name: agent-browser
     intent: >
@@ -27,9 +32,8 @@ preferences:
       En su lugar, agent-browser captura screenshots de páginas web reales, UIs
       y aplicaciones en ejecución via `agent-browser open <url>` y
       `agent-browser screenshot <path>`.
-      Actualizar la línea de compatibilidad, la sección de ilustraciones,
-      la sección de slide deck mode, y cualquier otro lugar donde se mencione
-      surf-cli. Mantener el flujo de embeber en base64 pero adaptado a
+      Actualizar la línea de compatibilidad, references/extras.md (sección Images)
+      y cualquier otro lugar donde se mencione surf-cli o `surf`. Mantener el flujo de embeber en base64 pero adaptado a
       los comandos de agent-browser.
 
   - name: r2-upload
@@ -45,6 +49,6 @@ preferences:
       Configuración via variables de entorno: VE_R2_ACCOUNT_ID, VE_R2_BUCKET,
       VE_R2_PUBLIC_URL, y CLOUDFLARE_API_TOKEN (las credenciales S3 se derivan
       del token) u opcionalmente VE_R2_ACCESS_KEY_ID + VE_R2_SECRET_ACCESS_KEY.
-      Asegurar que SKILL.md tenga una sección "Sharing Pages" que documente esto
-      y que el comando share (commands/share.md, desde files/) esté listado.
+      Asegurar que SKILL.md tenga una sección corta "Share" (solo cuando el usuario
+      pida compartir) que apunte a upload.py y a commands/share.md (desde files/).
       Quitar todas las referencias a Vercel, vercel-deploy, share.sh, S3 y GCS.

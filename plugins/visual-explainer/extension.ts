@@ -451,8 +451,7 @@ export default function (pi: ExtensionAPI) {
     description: "Plan visual explanations, or render a page source to HTML in ~/.agent/diagrams/ (or VISUAL_EXPLAINER_OUTPUT_DIR when set).",
     promptSnippet: "Plan or render visual-explainer pages. Use render with path for a page source.",
     promptGuidelines: [
-      "After a plan, architecture, diff review, or substantial implementation, offer a visual explanation when it would clarify the work.",
-      "Visuals cost many tokens: ask before visual_explainer action=prepare unless the user asked for a diagram, visual review, recap, or visual plan. If prepare recommends a scout subagent and one is available, gather context first.",
+      "Use visual_explainer only when the user explicitly asks for a diagram, visual review, recap, visual plan, or other visual output; never offer or start one on your own. If prepare recommends a scout subagent and one is available, gather context first.",
       "Write the page as <name>.src.html in ~/.agent/diagrams/ (or VISUAL_EXPLAINER_OUTPUT_DIR) and pass path to action=render; revise with small edits and render again. viewer=glimpse only when the user wants a Glimpse window.",
       "A plan source (<ve-plan> tags, references/plans.md) renders the same way, checked against the session's cwd.",
     ],

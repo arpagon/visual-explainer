@@ -38,9 +38,9 @@ Edit it directly using the edit tool. For each preference, find the relevant tex
 ### 4. Verify
 
 After applying, verify zero matches for:
-- `surf-cli`, `surf`, `which surf` → should be `agent-browser`
+- `surf-cli`, `` `surf` `` (SKILL.md, references/extras.md) → should be `agent-browser`
 - `Vercel`, `vercel-deploy`, `share.sh`, `S3`, `GCS`, `VE_S3_`, `VE_GCS_` → should be R2/`upload.py`
-- `proactively`, `always default`, `Never fall back`, `Don't wait for the user`
+- `proactively`, `always default`, `Never fall back`, `Don't wait for the user`, `becomes a page`, `offer a visual explanation` (extension.ts)
 
 ### 5. Commit
 
