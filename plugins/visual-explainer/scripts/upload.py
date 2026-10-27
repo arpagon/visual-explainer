@@ -5,8 +5,11 @@
 """Upload files to Cloudflare R2 under a shared UUID folder and print public URLs.
 
 All files in one call land under the same UUIDv7 folder:
-  r2://<bucket>/tmp/<uuid7>/<filename>    (default, deleted after 30 days)
-  r2://<bucket>/keep/<uuid7>/<filename>   (--keep, kept indefinitely)
+  r2://<bucket>/tmp/<user>/<host>/<harness>/<uuid7>/<filename>   (default, deleted after 30 days)
+  r2://<bucket>/keep/<user>/<host>/<harness>/<uuid7>/<filename>  (--keep, kept indefinitely)
+
+<user>, <host>, and <harness> record who published the page, from which
+machine, and with which agent (pi, claude-code, codex, ...).
 
 The bucket has an R2 lifecycle rule that deletes objects under `tmp/` after
 30 days. R2 lifecycle rules match prefixes, not object tags.
@@ -23,6 +26,7 @@ Environment variables:
   VE_R2_ACCOUNT_ID   Cloudflare account that owns the bucket (required)
   VE_R2_BUCKET       bucket name (required)
   VE_R2_PUBLIC_URL   public base URL of the bucket's custom domain (required)
+  VE_HARNESS         agent name for the path (default: pi)
   CLOUDFLARE_API_TOKEN
                      API token with R2 write access. S3 credentials are derived
                      from it: access key = token id, secret = sha256(token).
@@ -34,6 +38,7 @@ import hashlib
 import json
 import mimetypes
 import os
+import socket
 import sys
 import urllib.request
 import uuid
@@ -44,6 +49,9 @@ import boto3
 ACCOUNT_ID = os.environ.get("VE_R2_ACCOUNT_ID", "")
 BUCKET     = os.environ.get("VE_R2_BUCKET", "")
 PUBLIC_URL = os.environ.get("VE_R2_PUBLIC_URL", "").rstrip("/")
+HARNESS    = os.environ.get("VE_HARNESS", "pi")
+USER       = os.environ.get("USER") or os.environ.get("USERNAME") or "unknown"
+HOST       = socket.gethostname().split(".")[0]
 
 
 def fail(msg: str) -> None:
@@ -102,7 +110,7 @@ def main() -> None:
         region_name="auto",
     )
 
-    prefix = f"{'keep' if keep else 'tmp'}/{uuid.uuid7()}"
+    prefix = f"{'keep' if keep else 'tmp'}/{USER}/{HOST}/{HARNESS}/{uuid.uuid7()}"
     urls = []
     for path in paths:
         key = f"{prefix}/{path.name}"

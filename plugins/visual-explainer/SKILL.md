@@ -84,7 +84,7 @@ Exact, calm, visual, and specific to the subject: someone who understands the sy
 
 ## Share
 
-Only when the user asks to share a page: upload it (and its assets) to Cloudflare R2 with `uv run <this skill's directory>/scripts/upload.py [--keep] <name>.html [asset ...]`. It prints one public URL per file under `https://ve.arpagon.co/`; without `--keep` the files are deleted after 30 days. Details and configuration: `commands/share.md`.
+Only when the user asks to share a page: upload it (and its assets) to Cloudflare R2 with `uv run <this skill's directory>/scripts/upload.py [--keep] <name>.html [asset ...]`. It prints one public URL per file under `https://ve.arpagon.co/<tmp|keep>/<user>/<host>/<harness>/<uuid>/`, where `VE_HARNESS` names the agent (default `pi`); without `--keep` the files are deleted after 30 days. Details and configuration: `commands/share.md`.
 
 ## Before delivery
 

@@ -44,10 +44,12 @@ preferences:
       El script está en scripts/upload.py (copiado desde files/).
       Uso: `uv run {{skill_dir}}/scripts/upload.py [--keep] <html> [assets...]`.
       Todos los archivos de una llamada comparten una carpeta UUIDv7.
-      Por defecto van a tmp/<uuid>/ y una lifecycle rule de R2 los borra a los
-      30 días; con --keep van a keep/<uuid>/ y persisten.
+      Ruta: <tmp|keep>/<user>/<host>/<harness>/<uuid>/<archivo>, para saber quién,
+      desde qué máquina y con qué agente (VE_HARNESS, default pi) se publicó.
+      Por defecto van a tmp/ y una lifecycle rule de R2 los borra a los
+      30 días; con --keep van a keep/ y persisten.
       Configuración via variables de entorno: VE_R2_ACCOUNT_ID, VE_R2_BUCKET,
-      VE_R2_PUBLIC_URL, y CLOUDFLARE_API_TOKEN (las credenciales S3 se derivan
+      VE_R2_PUBLIC_URL, VE_HARNESS, y CLOUDFLARE_API_TOKEN (las credenciales S3 se derivan
       del token) u opcionalmente VE_R2_ACCESS_KEY_ID + VE_R2_SECRET_ACCESS_KEY.
       Asegurar que SKILL.md tenga una sección corta "Share" (solo cuando el usuario
       pida compartir) que apunte a upload.py y a commands/share.md (desde files/).
