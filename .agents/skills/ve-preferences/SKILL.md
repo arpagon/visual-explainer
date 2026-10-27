@@ -39,7 +39,7 @@ Edit it directly using the edit tool. For each preference, find the relevant tex
 
 After applying, verify zero matches for:
 - `surf-cli`, `surf`, `which surf` → should be `agent-browser`
-- `Vercel`, `vercel-deploy`, `share.sh` → should be GCS/`upload.py`
+- `Vercel`, `vercel-deploy`, `share.sh`, `S3`, `GCS`, `VE_S3_`, `VE_GCS_` → should be R2/`upload.py`
 - `proactively`, `always default`, `Never fall back`, `Don't wait for the user`
 
 ### 5. Commit

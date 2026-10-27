@@ -1,52 +1,56 @@
 # Share Visual Explainer Page
 
-Upload a visual explainer HTML file to Google Cloud Storage and get a public URL.
+Upload a visual explainer HTML file (and optional assets) to Cloudflare R2 and get public URLs.
 
 ## Usage
 
 ```
-/share <file-path>
+/share [--keep] <file-path> [asset ...]
 ```
 
 **Arguments:**
 - `file-path` - Path to the HTML file to share (required)
+- `asset` - Extra files (images, videos) uploaded to the same folder
+- `--keep` - Keep the files indefinitely instead of deleting them after 30 days
 
 **Examples:**
 ```
 /share ~/.agent/diagrams/my-diagram.html
-/share /tmp/visual-explainer-output.html
+/share ~/.agent/diagrams/my-diagram.html hero.png clip.mp4
+/share --keep ~/.agent/diagrams/my-diagram.html
 ```
 
 ## How It Works
 
-1. Generates a UUIDv7-based filename for uniqueness and time-ordering
-2. Uploads to the configured GCS bucket
-3. Returns the public URL immediately
+1. Generates one UUIDv7 folder for all files in the call
+2. Uploads to `tmp/<uuid>/` (default) or `keep/<uuid>/` (`--keep`) with the correct Content-Type
+3. Prints one public URL per file, in order
+4. An R2 lifecycle rule deletes everything under `tmp/` after 30 days
 
-## Configuration
-
-Set these environment variables:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VE_GCS_BUCKET` | GCS bucket name | *(required)* |
-| `VE_GCS_PREFIX` | Blob prefix / folder | `diagrams` |
-| `VE_GCS_SA_KEY` | Path to SA JSON key | `scripts/gcs-sa.json` |
-
-## Script Location
+## Script
 
 ```bash
-uv run {{skill_dir}}/scripts/upload.py <file>
+uv run {{skill_dir}}/scripts/upload.py [--keep] <file> [asset ...]
 ```
 
 ## Output
 
 ```
-https://storage.googleapis.com/your-bucket/diagrams/019538a2-....html
+https://<VE_R2_PUBLIC_URL host>/tmp/019538a2-.../my-diagram.html
 ```
+
+## Configuration
+
+| Variable | Description |
+|----------|-------------|
+| `VE_R2_ACCOUNT_ID` | Cloudflare account that owns the bucket (required) |
+| `VE_R2_BUCKET` | R2 bucket name (required) |
+| `VE_R2_PUBLIC_URL` | Public base URL of the bucket's custom domain (required) |
+| `CLOUDFLARE_API_TOKEN` | Token with R2 write access; S3 credentials are derived from it |
+| `VE_R2_ACCESS_KEY_ID`, `VE_R2_SECRET_ACCESS_KEY` | Optional R2 S3 credentials used instead of the token |
 
 ## Notes
 
-- URLs are permanent and publicly accessible
-- Files are time-ordered thanks to UUIDv7
-- If `VE_GCS_BUCKET` is not set, the upload will fail with a clear error
+- URLs are public as soon as the upload finishes
+- Without `--keep`, files expire after 30 days
+- Folders are time-ordered thanks to UUIDv7

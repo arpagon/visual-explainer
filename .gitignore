@@ -1,5 +1,4 @@
 .DS_Store
-gcs-sa.json
 *.pem
 *.key
 .env

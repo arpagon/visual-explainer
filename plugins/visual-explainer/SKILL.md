@@ -26,7 +26,7 @@ Detailed prompt templates in `./commands/`. In Pi, these are slash commands (`/d
 | `plan-review` | Compare a plan against the codebase with risk assessment |
 | `project-recap` | Mental model snapshot for context-switching back to a project |
 | `fact-check` | Verify accuracy of a document against actual code |
-| `share` | Upload an HTML page to S3 and get a public URL |
+| `share` | Upload an HTML page to Cloudflare R2 and get a public URL |
 
 ## Workflow
 
@@ -367,49 +367,42 @@ Every diagram is a single self-contained `.html` file. No external assets except
 
 ## Sharing Pages
 
-Upload visual explainer pages (y assets opcionales) a S3 via `upload.py`. Todos los archivos de un batch comparten el mismo UUID folder.
+Upload a page (and optional assets) to Cloudflare R2 with `upload.py`. All files in one call share a UUIDv7 folder and are served from the bucket's public custom domain.
 
 **Usage:**
 ```bash
-# Solo HTML
+# HTML only
 uv run {{skill_dir}}/scripts/upload.py diagram.html
 
-# HTML + assets (imágenes, videos, etc.) — mismo UUID folder
+# HTML + assets (images, videos) in the same folder
 uv run {{skill_dir}}/scripts/upload.py diagram.html hero.png clip.mp4
 
-# Conservar indefinidamente (sin tag ttl, no se borra)
+# Keep indefinitely instead of 30 days
 uv run {{skill_dir}}/scripts/upload.py --keep diagram.html
 ```
 
-**Output:** una URL pública por archivo, en orden:
+**Output:** one public URL per file, in order:
 ```
-https://<VE_S3_BUCKET>.s3.amazonaws.com/arpagon/host/pi/<uuid>/diagram.html
-https://<VE_S3_BUCKET>.s3.amazonaws.com/arpagon/host/pi/<uuid>/hero.png
+https://ve.arpagon.co/tmp/<uuid>/diagram.html
+https://ve.arpagon.co/tmp/<uuid>/hero.png
 ```
 
 **How it works:**
-1. Genera un UUIDv7 compartido para todos los archivos del batch
-2. Sube cada archivo a `<user>/<hostname>/<harness>/<uuid>/` con su Content-Type correcto
-3. Por defecto añade tag `ttl=30d` → lifecycle rule borra a los 30 días automáticamente
-4. Con `--keep` omite el tag y los objetos persisten indefinidamente
+1. One UUIDv7 folder per call
+2. Files go to `tmp/<uuid>/` by default, or `keep/<uuid>/` with `--keep`, with the correct Content-Type
+3. An R2 lifecycle rule deletes everything under `tmp/` after 30 days; `keep/` persists
 
-**Configuration:**
+**Configuration** (set in `~/.bashrc`):
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VE_S3_BUCKET` | S3 bucket name | *(required)* |
-| `VE_S3_REGION` | AWS region | `us-east-1` |
-| `VE_HARNESS` | Harness name for path segment | `pi` |
+| Variable | Description |
+|----------|-------------|
+| `VE_R2_ACCOUNT_ID` | Cloudflare account that owns the bucket (required) |
+| `VE_R2_BUCKET` | R2 bucket name (required) |
+| `VE_R2_PUBLIC_URL` | Public base URL, e.g. `https://ve.arpagon.co` (required) |
+| `CLOUDFLARE_API_TOKEN` | Token with R2 write access; S3 credentials are derived from it |
+| `VE_R2_ACCESS_KEY_ID`, `VE_R2_SECRET_ACCESS_KEY` | Optional R2 S3 credentials used instead of the token |
 
-Usa las credenciales AWS del sistema (`~/.aws/credentials` o variables `AWS_*`). No requiere key file.
-
-**Notes:**
-- URLs son públicas e inmediatas
-- Sin `--keep`: los objetos expiran a los 30 días (lifecycle rule por tag `ttl=30d`)
-- Con `--keep`: persisten indefinidamente
-- Archivos time-ordered gracias a UUIDv7
-
-See `./commands/share.md` for the `/share` command template.
+URLs are public as soon as the upload finishes. See `./commands/share.md` for the `/share` command template.
 
 ## Quality Checks
 

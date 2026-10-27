@@ -38,7 +38,7 @@ Definidas en `.agents/skills/ve-preferences/preferences.yaml`:
 |------------|-----------|
 | `opt-in-only` | Quitar todo comportamiento proactivo — solo activar cuando el usuario lo pida |
 | `agent-browser` | Reemplazar surf-cli con agent-browser para screenshots web |
-| `gcs-upload` | Reemplazar sharing via Vercel con upload a GCS |
+| `r2-upload` | Reemplazar sharing de upstream con upload a Cloudflare R2 (`ve.arpagon.co`) |
 
 ## Archivos custom
 
@@ -47,7 +47,7 @@ Copiados desde `.agents/skills/ve-preferences/files/` durante el sync:
 | Archivo | Reemplaza |
 |---------|-----------|
 | `scripts/upload.py` | `scripts/share.sh` |
-| `commands/share.md` | Versión Vercel de upstream |
+| `commands/share.md` | Comando de sharing de upstream |
 
 ## Branching
 

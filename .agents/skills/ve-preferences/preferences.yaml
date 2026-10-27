@@ -3,9 +3,9 @@
 # después de sincronizar con upstream. Son intenciones, no parches exactos.
 
 # ─── Entorno ────────────────────────────────────────────────────────────
-# Estas variables deben existir para que el sharing via GCS funcione.
+# Estas variables deben existir para que el sharing via Cloudflare R2 funcione.
 # Están en ~/.bashrc, NO en este archivo.
-# VE_GCS_BUCKET, VE_GCS_SA_KEY, VE_GCS_PREFIX (optional, default: diagrams)
+# VE_R2_ACCOUNT_ID, VE_R2_BUCKET, VE_R2_PUBLIC_URL, CLOUDFLARE_API_TOKEN
 
 preferences:
   - name: opt-in-only
@@ -32,14 +32,19 @@ preferences:
       surf-cli. Mantener el flujo de embeber en base64 pero adaptado a
       los comandos de agent-browser.
 
-  - name: gcs-upload
+  - name: r2-upload
     intent: >
-      Reemplazar el sharing via Vercel deploy con upload a Google Cloud Storage.
-      El script de upload está en scripts/upload.py (copiado desde .arpagon/files/).
-      Uso: `uv run {{skill_dir}}/scripts/upload.py <html-file>`
-      Genera un nombre de archivo basado en UUIDv7 y sube a GCS.
-      Configuración via variables de entorno:
-        VE_GCS_BUCKET (requerido), VE_GCS_PREFIX (default: diagrams),
-        VE_GCS_SA_KEY (default: scripts/gcs-sa.json).
-      Quitar todas las referencias a Vercel, vercel-deploy skill, y share.sh.
-      El archivo commands/share.md también se reemplaza (desde .arpagon/files/).
+      Reemplazar cualquier mecanismo de sharing de upstream (Vercel, share.sh,
+      S3, GCS) por upload a Cloudflare R2 en la cuenta Arpagon@gmail.com,
+      bucket visual-explainer, servido públicamente en https://ve.arpagon.co.
+      El script está en scripts/upload.py (copiado desde files/).
+      Uso: `uv run {{skill_dir}}/scripts/upload.py [--keep] <html> [assets...]`.
+      Todos los archivos de una llamada comparten una carpeta UUIDv7.
+      Por defecto van a tmp/<uuid>/ y una lifecycle rule de R2 los borra a los
+      30 días; con --keep van a keep/<uuid>/ y persisten.
+      Configuración via variables de entorno: VE_R2_ACCOUNT_ID, VE_R2_BUCKET,
+      VE_R2_PUBLIC_URL, y CLOUDFLARE_API_TOKEN (las credenciales S3 se derivan
+      del token) u opcionalmente VE_R2_ACCESS_KEY_ID + VE_R2_SECRET_ACCESS_KEY.
+      Asegurar que SKILL.md tenga una sección "Sharing Pages" que documente esto
+      y que el comando share (commands/share.md, desde files/) esté listado.
+      Quitar todas las referencias a Vercel, vercel-deploy, share.sh, S3 y GCS.
